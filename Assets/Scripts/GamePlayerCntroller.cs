@@ -19,7 +19,8 @@ public class GamePlayerCntroller : MonoBehaviour
 		public float inputDelay = 0.1f;
 		public string VERTICAL_AXIS = "PlayerVertical";
 		public string HORIZONTAL_AXIS = "PlayerHorizontal";
-		//public string TURN_AXIS = "Horizontal";
+		public string DEPTH_AXIS = "PlayerDepth";
+		public string TURN_AXIS = "Horizontal";
 	}
 
 	public MoveSettings moveSettings = new MoveSettings();
@@ -29,6 +30,7 @@ public class GamePlayerCntroller : MonoBehaviour
 	Quaternion targetRotation;
 	Rigidbody rBody;
 	float verticalInput, horizontalInput, turnInput;
+	float depthInput;
 
 	private void Start()
 	{
@@ -40,15 +42,17 @@ public class GamePlayerCntroller : MonoBehaviour
 			Debug.LogError("No rigidbody!");
 
 		verticalInput = horizontalInput = turnInput = 0;
+		depthInput = 0;
 	}
 
 	private void GetInput()
 	{
 		verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
 		horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
-		
 
-		//turnInput = Input.GetAxis(inputSettings.TURN_AXIS);
+		depthInput = Input.GetAxis(inputSettings.DEPTH_AXIS);
+
+		turnInput = Input.GetAxis(inputSettings.TURN_AXIS);
 	}
 
 	private void Update()
@@ -59,15 +63,16 @@ public class GamePlayerCntroller : MonoBehaviour
 	private void FixedUpdate()
 	{
 		MoveForward();
-		//Turn();
+		Turn();
 
 		rBody.velocity = transform.TransformDirection(velocity);
 	}
 	private void MoveForward()
 	{
 		// move
-		velocity.z = moveSettings.forwardVel * Time.deltaTime;
-		
+		//velocity.z = moveSettings.forwardVel * Time.deltaTime;
+		velocity.z = moveSettings.forwardVel * depthInput * Time.deltaTime;
+
 		velocity.y = moveSettings.verticalVel * verticalInput * Time.deltaTime;
 		
 		velocity.x = moveSettings.horizontalVel * horizontalInput * Time.deltaTime;

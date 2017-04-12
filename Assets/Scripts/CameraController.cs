@@ -177,8 +177,8 @@ public class CameraController : MonoBehaviour
 	{
 		if ( hOrbitSnapInput > 0 )
 		{
-			orbitSettings.xRotation = -20;
-			orbitSettings.yRotation = -180;
+			orbitSettings.xRotation = 0;
+			orbitSettings.yRotation = 0;
 		}
 
 		orbitSettings.xRotation += -vOrbitInput * orbitSettings.vOrbitSmooth * Time.deltaTime;
