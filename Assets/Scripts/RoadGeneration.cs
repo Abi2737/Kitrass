@@ -10,7 +10,7 @@ public class RoadGeneration : MonoBehaviour
 	public GameObject leftPiece;
 	public GameObject leftAndRightPiece;
 
-	enum PieceType
+	public enum PieceType
 	{
 		NONE,
 
@@ -20,7 +20,7 @@ public class RoadGeneration : MonoBehaviour
 		LEFT_AND_RIGHT
 	}
 
-	enum Direction
+	public enum Direction
 	{
 		FORWARD = 0,
 		RIGHT = 1,
@@ -28,7 +28,7 @@ public class RoadGeneration : MonoBehaviour
 		LEFT = 3
 	}
 
-	class PieceEntry
+	public class PieceEntry
 	{
 		public GameObject piece;
 		public PieceType type;
@@ -50,8 +50,7 @@ public class RoadGeneration : MonoBehaviour
 	private List<PieceEntry> _leafs;
 	private HashSet<Vector3> _takenPos;
 
-	// Use this for initialization
-	void Start ()
+	private void Awake()
 	{
 		_root = new PieceEntry();
 		_root.piece = Instantiate(simplePiece);
@@ -66,14 +65,45 @@ public class RoadGeneration : MonoBehaviour
 		_takenPos.Add(_root.gridPos);
 
 
-		//DebugCreateInitialRoad();
-		DebugCreateInitialStraightRoad(20);
+		DebugCreateInitialRoad();
+		//DebugCreateInitialStraightRoad(20);
+		//DebugCreateInitialOneRightPieceRoad(4, 1);
+		//DebugCreateInitialOneLeftPieceRoad(4, 1);
 	}
-	
+
+	// Use this for initialization
+	void Start ()
+	{
+		PrintRoad();
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
 		//DebugCreateRuntimeRoad();
+	}
+
+	public PieceEntry GetRoadRoot()
+	{
+		return _root;
+	}
+
+	private void PrintRoad()
+	{
+		string result = "";
+		var crtPE = _root;
+		while (true)
+		{
+			result += crtPE.type + " ";
+			if ( crtPE.children.Count == 0 )
+			{
+				break;
+			}
+
+			crtPE = crtPE.children[0];
+		}
+
+		Debug.Log(result);
 	}
 
 	private PieceEntry CreateAndAddPieceToRoad(PieceEntry parent, PieceType type)
@@ -102,6 +132,7 @@ public class RoadGeneration : MonoBehaviour
 		
 		int dir = (int)parent.dir;	// newPiece's direction
 		Vector3[] translateXOZ = RoadPositions.forwardTranslateXOZ;
+
 		switch (parent.type)
 		{
 			case PieceType.LEFT:
@@ -148,7 +179,9 @@ public class RoadGeneration : MonoBehaviour
 
 		// calculate the newPiece's world position based on the parent's world position
 		int ind = (int)parent.dir;
-		newPiece.piece.transform.position = parent.piece.transform.position + translateXOZ[ind];
+		Vector3 offsetTranslate = Vector3.zero;
+		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
+		newPiece.piece.transform.position = parent.piece.transform.position + translateXOZ[ind] + offsetTranslate;
 
 		// set the newPiece's rotation (-90 initial rotation of the prefab)
 		newPiece.piece.transform.eulerAngles = new Vector3(0, -90 + 90 * dir, 0);
@@ -278,6 +311,136 @@ public class RoadGeneration : MonoBehaviour
 		PieceEntry parent = _root;
 
 		for ( int i = 0; i < numPieces; i++ )
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+	}
+
+	private void DebugCreateInitialOneRightPieceRoad(int numPieces, int indRightPiece)
+	{
+		PieceEntry parent = _root;
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.RIGHT);
+
+		for (var i = indRightPiece; i < numPieces; i++ )
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.RIGHT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.RIGHT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece + 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.RIGHT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece + 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.RIGHT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+	}
+
+	private void DebugCreateInitialOneLeftPieceRoad(int numPieces, int indRightPiece)
+	{
+		PieceEntry parent = _root;
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.LEFT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.LEFT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece - 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.LEFT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece + 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.LEFT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		for (int i = 0; i < indRightPiece + 1; i++)
+		{
+			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+		}
+
+		parent = CreateAndAddPieceToRoad(parent, PieceType.LEFT);
+
+		for (var i = indRightPiece; i < numPieces; i++)
 		{
 			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
 		}
