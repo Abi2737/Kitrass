@@ -135,6 +135,9 @@ public class GameCameraController : MonoBehaviour
 	private void MoveToTarget()
 	{
 		targetPos.z = target.position.z + positionSettings.targetPosOffset.z;
+		targetPos.x = target.position.x + positionSettings.targetPosOffset.x;
+		targetPos.y = target.position.y + positionSettings.targetPosOffset.y;
+
 		destination = Quaternion.Euler(orbitSettings.xRotation, orbitSettings.yRotation + target.eulerAngles.y, 0) * Vector3.forward * positionSettings.distanceFromTarget;
 		destination += targetPos;
 
