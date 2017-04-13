@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts;
+using System;
 
 public class GamePlayerController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class GamePlayerController : MonoBehaviour
 		public float verticalVel = 100;
 		public float horizontalVel = 100;
 		public float rotateVel = 100;
+
+		public float turnSpeed = 10;
 	}
 
 	[System.Serializable]
@@ -36,7 +39,10 @@ public class GamePlayerController : MonoBehaviour
 
 
 	RoadGeneration.PieceEntry thePieceRoadWhereIam;
+	int indChildNextPiece;
 	bool pieceRoadChanged, rotatedOnSpecialPiece;
+
+	float playerRotation;
 
 	private void Start()
 	{
@@ -52,21 +58,24 @@ public class GamePlayerController : MonoBehaviour
 
 
 		thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetRoadRoot();
+		indChildNextPiece = 0;
 		pieceRoadChanged = false;
 		rotatedOnSpecialPiece = false;
+
+		playerRotation = 0;
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
 		//Debug.Log(this.name + " trigger: othName: " + other.name);
-		rotatedOnSpecialPiece = false;
 
 		if (!pieceRoadChanged)
 		{
 			pieceRoadChanged = true;
+			rotatedOnSpecialPiece = false;
 
-			if (thePieceRoadWhereIam.children.Count > 0)
-				thePieceRoadWhereIam = thePieceRoadWhereIam.children[0];
+			if (indChildNextPiece < thePieceRoadWhereIam.children.Count)
+				thePieceRoadWhereIam = thePieceRoadWhereIam.children[indChildNextPiece];
 
 			Debug.Log("TG: " + thePieceRoadWhereIam.piece.transform.position + " type: " + thePieceRoadWhereIam.type);
 		}
@@ -91,22 +100,22 @@ public class GamePlayerController : MonoBehaviour
 	{
 		GetInput();
 
-		float rotationAngle = GetAngleRotationForPlayer();
-		if ( rotationAngle != 0.0f )
-		{
-			this.transform.Rotate(Vector3.up, rotationAngle);
-		}
+		playerRotation += GetAngleRotationForPlayer();
+		transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, playerRotation, 0), moveSettings.turnSpeed * Time.deltaTime);
 	}
 
 	private float GetAngleRotationForPlayer()
 	{
 		if (thePieceRoadWhereIam.type == RoadGeneration.PieceType.SIMPLE)
 		{
+			indChildNextPiece = 0;
 			return 0.0f;
 		}
 
 		if (rotatedOnSpecialPiece)
 			return 0.0f;
+
+		//rotatedOnSpecialPiece = true;
 
 		float turningPoint;
 
@@ -115,7 +124,7 @@ public class GamePlayerController : MonoBehaviour
 			case RoadGeneration.Direction.FORWARD:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
 				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].z / 2;
-				turningPoint -= RoadPositions.WIDTH_PIECE / 2;
+				turningPoint -= RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.z >= turningPoint)
 				{
 					rotatedOnSpecialPiece = true;
@@ -125,7 +134,7 @@ public class GamePlayerController : MonoBehaviour
 			case RoadGeneration.Direction.RIGHT:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
 				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].x / 2;
-				turningPoint -= RoadPositions.WIDTH_PIECE / 2;
+				turningPoint -= RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.x >= turningPoint)
 				{
 					rotatedOnSpecialPiece = true;
@@ -135,7 +144,7 @@ public class GamePlayerController : MonoBehaviour
 			case RoadGeneration.Direction.BACKWARD:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
 				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].z / 2;
-				turningPoint += RoadPositions.WIDTH_PIECE / 2;
+				turningPoint += RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.z <= turningPoint)
 				{
 					rotatedOnSpecialPiece = true;
@@ -145,7 +154,7 @@ public class GamePlayerController : MonoBehaviour
 			case RoadGeneration.Direction.LEFT:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
 				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].x / 2;
-				turningPoint += RoadPositions.WIDTH_PIECE / 2;
+				turningPoint += RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.x <= turningPoint)
 				{
 					rotatedOnSpecialPiece = true;
@@ -158,11 +167,20 @@ public class GamePlayerController : MonoBehaviour
 			switch (thePieceRoadWhereIam.type)
 			{
 				case RoadGeneration.PieceType.LEFT:
+					indChildNextPiece = 0;
 					return -90.0f;
+
 				case RoadGeneration.PieceType.RIGHT:
+					indChildNextPiece = 0;
 					return 90.0f;
+
 				case RoadGeneration.PieceType.LEFT_AND_RIGHT:
-					return -90.0f;
+					System.Random rnd = new System.Random();
+					indChildNextPiece = rnd.Next(2);
+					if(indChildNextPiece == 0)
+						return -90.0f;
+
+					return 90.0f;
 			}
 		}
 
