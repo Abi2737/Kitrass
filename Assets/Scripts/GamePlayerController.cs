@@ -99,21 +99,49 @@ public class GamePlayerController : MonoBehaviour
 	private void Update()
 	{
 		GetInput();
+	}
 
-		playerRotation += GetAngleRotationForPlayer();
+	private void FixedUpdate()
+	{
+		MoveForward();
+		Turn();
+
+		rBody.velocity = transform.TransformDirection(velocity);
+	}
+
+	private void MoveForward()
+	{
+		// move
+		velocity.z = moveSettings.forwardVel * Time.deltaTime;
+		//velocity.z = moveSettings.forwardVel * depthInput * Time.deltaTime;
+
+		velocity.y = moveSettings.verticalVel * verticalInput * Time.deltaTime;
+		
+		velocity.x = moveSettings.horizontalVel * horizontalInput * Time.deltaTime;
+	}
+
+	private void Turn()
+	{
+		if (Mathf.Abs(turnInput) > inputSettings.inputDelay)
+		{
+			targetRotation *= Quaternion.AngleAxis(moveSettings.rotateVel * turnInput * Time.deltaTime, Vector3.up);
+			transform.rotation = targetRotation;
+		}
+
+		ManagePlayerRotation();
 		transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, playerRotation, 0), moveSettings.turnSpeed * Time.deltaTime);
 	}
 
-	private float GetAngleRotationForPlayer()
+	private void ManagePlayerRotation()
 	{
 		if (thePieceRoadWhereIam.type == RoadGeneration.PieceType.SIMPLE)
 		{
 			indChildNextPiece = 0;
-			return 0.0f;
+			return;
 		}
 
 		if (rotatedOnSpecialPiece)
-			return 0.0f;
+			return;
 
 		//rotatedOnSpecialPiece = true;
 
@@ -162,56 +190,35 @@ public class GamePlayerController : MonoBehaviour
 				break;
 		}
 
+
+		float angle = 0;
+
 		if (rotatedOnSpecialPiece)
 		{
 			switch (thePieceRoadWhereIam.type)
 			{
 				case RoadGeneration.PieceType.LEFT:
 					indChildNextPiece = 0;
-					return -90.0f;
+					angle = -90.0f;
+					break;
 
 				case RoadGeneration.PieceType.RIGHT:
 					indChildNextPiece = 0;
-					return 90.0f;
+					angle = 90.0f;
+					break;
 
 				case RoadGeneration.PieceType.LEFT_AND_RIGHT:
 					System.Random rnd = new System.Random();
 					indChildNextPiece = rnd.Next(2);
-					if(indChildNextPiece == 0)
-						return -90.0f;
+					if (indChildNextPiece == 0)
+						angle = -90.0f;
+					else
+						angle = 90.0f;
 
-					return 90.0f;
+					break;
 			}
 		}
 
-		return 0.0f;
-	}
-
-	private void FixedUpdate()
-	{
-		MoveForward();
-		Turn();
-
-		rBody.velocity = transform.TransformDirection(velocity);
-	}
-
-	private void MoveForward()
-	{
-		// move
-		velocity.z = moveSettings.forwardVel * Time.deltaTime;
-		//velocity.z = moveSettings.forwardVel * depthInput * Time.deltaTime;
-
-		velocity.y = moveSettings.verticalVel * verticalInput * Time.deltaTime;
-		
-		velocity.x = moveSettings.horizontalVel * horizontalInput * Time.deltaTime;
-	}
-
-	private void Turn()
-	{
-		if (Mathf.Abs(turnInput) > inputSettings.inputDelay)
-		{
-			targetRotation *= Quaternion.AngleAxis(moveSettings.rotateVel * turnInput * Time.deltaTime, Vector3.up);
-			transform.rotation = targetRotation;
-		}
+		playerRotation += angle;
 	}
 }
