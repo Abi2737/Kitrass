@@ -78,8 +78,13 @@ public class RoadGeneration : MonoBehaviour
 		_root.piece.transform.position = Vector3.zero;
 		_root.gridPos = Vector3.zero;
 
+		// XOY
 		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		_root.piece.transform.eulerAngles = new Vector3(-90 + 90 * 0, -90, 90);
+		//_root.piece.transform.eulerAngles = new Vector3(-90 + 90 * 0, -90, 90);
+
+		// YOZ
+		// set the newPiece's rotation (-90 initial rotation of the prefab)
+		_root.piece.transform.eulerAngles = new Vector3(0, -180, 90);
 
 		_leafs = new List<PieceEntry>();
 		_leafs.Add(_root);
@@ -333,6 +338,86 @@ public class RoadGeneration : MonoBehaviour
 		return newPiece;
 	}
 
+	private PieceEntry CreateAndAddPieceToRoadYOZ(PieceEntry parent, PieceType type)
+	{
+		// create the new piece
+		PieceEntry newPiece = new PieceEntry();
+		// set it with the given type
+		newPiece.type = type;
+
+		int dir = (int)parent.dir;  // newPiece's direction
+		Vector3[] translateYOZ = RoadPositions.forwardTranslateYOZ;
+
+		switch (parent.type)
+		{
+			case PieceType.LEFT:
+				dir = (int)parent.dir - 1;
+				if (dir < 0)
+					dir = 3;
+
+				translateYOZ = RoadPositions.leftTranslateYOZ;
+				break;
+
+			case PieceType.RIGHT:
+				dir = (int)parent.dir + 1;
+				if (dir > 3)
+					dir = 0;
+
+				translateYOZ = RoadPositions.rightTranslateYOZ;
+				break;
+
+			case PieceType.LEFT_AND_RIGHT:
+				if (parent.children.Count == 0) // first time add the new piece on the parent's left
+				{
+					dir = (int)parent.dir - 1;
+					if (dir < 0)
+						dir = 3;
+
+					translateYOZ = RoadPositions.leftTranslateYOZ;
+				}
+				else    // second time add the new piece on the parent's right
+				{
+					dir = (int)parent.dir + 1;
+					if (dir > 3)
+						dir = 0;
+
+					translateYOZ = RoadPositions.rightTranslateYOZ;
+				}
+				break;
+		}
+
+		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
+		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslateYOZ[dir];
+
+		// set the direction
+		newPiece.dir = (Direction)dir;
+
+		// instantiate the piece according with the given type
+		newPiece.piece = InstantiatePiece(type);
+
+		// calculate the newPiece's world position based on the parent's world position
+		int ind = (int)parent.dir;
+		Vector3 offsetTranslate = Vector3.zero;
+		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
+		newPiece.piece.transform.position = parent.piece.transform.position + translateYOZ[ind] + offsetTranslate;
+
+		// set the newPiece's rotation (-90 initial rotation of the prefab)
+		newPiece.piece.transform.eulerAngles = new Vector3(0 - 90 * dir, -180, 90);
+
+
+		// add the newPiece in the parent's list of children
+		parent.children.Add(newPiece);
+
+		// set the newPiece's parent
+		newPiece.parent = parent;
+
+
+		// mark the grid pos as taken
+		_takenPos.Add(newPiece.gridPos);
+
+		return newPiece;
+	}
+
 	private bool IsEmptyPos(PieceEntry parent, PieceType childType)
 	{
 		// calculate the newPiece's direction
@@ -413,6 +498,46 @@ public class RoadGeneration : MonoBehaviour
 		return !_takenPos.Contains(checkPos);
 	}
 
+	private bool IsEmptyPosYOZ(PieceEntry parent, PieceType childType)
+	{
+		// calculate the newPiece's direction
+		int dir = (int)parent.dir;
+		switch (parent.type)
+		{
+			case PieceType.LEFT:
+				dir = (int)parent.dir - 1;
+				if (dir < 0)
+					dir = 3;
+				break;
+
+			case PieceType.RIGHT:
+				dir = (int)parent.dir + 1;
+				if (dir > 3)
+					dir = 0;
+				break;
+
+			case PieceType.LEFT_AND_RIGHT:
+				if (parent.children.Count == 0)
+				{
+					dir = (int)parent.dir - 1;
+					if (dir < 0)
+						dir = 3;
+				}
+				else
+				{
+					dir = (int)parent.dir + 1;
+					if (dir > 3)
+						dir = 0;
+				}
+				break;
+		}
+
+		// calculate the checking position based on the parent gridPosition and the newPiece's direction
+		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslateYOZ[dir];
+
+		return !_takenPos.Contains(checkPos);
+	}
+
 
 	private void DebugCreateRuntimeRoad()
 	{
@@ -444,20 +569,19 @@ public class RoadGeneration : MonoBehaviour
 			List<PieceEntry> newLeafs = new List<PieceEntry>();
 			foreach (var pe in _leafs)
 			{
-				if (!IsEmptyPosXOY(pe, crtType))
+				if (!IsEmptyPosYOZ(pe, crtType))
 					continue;
 
-				PieceEntry newPiece = CreateAndAddPieceToRoadXOY(pe, crtType);
+				PieceEntry newPiece = CreateAndAddPieceToRoadYOZ(pe, crtType);
 				_takenPos.Add(newPiece.gridPos);
 				newLeafs.Add(newPiece);
-				Debug.Log("Add");
 
 				if (pe.type == PieceType.LEFT_AND_RIGHT)
 				{
-					if (!IsEmptyPosXOY(pe, crtType))
+					if (!IsEmptyPosYOZ(pe, crtType))
 						continue;
 
-					PieceEntry newPiece2 = CreateAndAddPieceToRoadXOY(pe, crtType);
+					PieceEntry newPiece2 = CreateAndAddPieceToRoadYOZ(pe, crtType);
 					_takenPos.Add(newPiece2.gridPos);
 					newLeafs.Add(newPiece2);
 				}

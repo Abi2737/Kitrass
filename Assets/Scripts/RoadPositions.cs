@@ -121,6 +121,13 @@ namespace Assets.Scripts
 
 
 
+		public static Vector3[] gridTranslateYOZ =
+		{
+			new Vector3(0, 1, 0),		// forward +y
+			new Vector3(0, 0, 1),		// right +z
+			new Vector3(0, -1, 0),		// backward -y
+			new Vector3(0, 0, -1)		// left -z
+		};
 
 		public static Vector3[] forwardTranslateYOZ =
 		{
@@ -130,6 +137,37 @@ namespace Assets.Scripts
 			new Vector3(0, 0, -LENGTH_PIECE)		// left -z
 		};
 
+		public static Vector3[] rightTranslateYOZ =
+		{
+			new Vector3(0, LENGTH_PIECE/2 - WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2),		// forward +y
+			new Vector3(0, -WIDTH_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2),	// right +z
+			new Vector3(0, -LENGTH_PIECE/2 + WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2),	// backward -y
+			new Vector3(0, WIDTH_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2)		// left -z
+		};
+
+		public static Vector3[] leftTranslateYOZ =
+		{
+			new Vector3(0, LENGTH_PIECE/2 - WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2),	// forward +y
+			new Vector3(0, WIDTH_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2),		// right +z
+			new Vector3(0, -LENGTH_PIECE/2 + WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2),	// backward -y
+			new Vector3(0, -WIDTH_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2)	// left -z
+		};
+
+		public static Vector3[] upTranslateYOZ =
+		{
+			new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0),	// forward +y
+			new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0, +LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// right +z
+			new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0),	// backward -y
+			new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2)	// left -z
+		};
+
+		public static Vector3[] downTranslateYOZ =
+		{
+			new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0),	// forward +y
+			new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0, LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// right +z
+			new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0),	// backward -y
+			new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2)	// left -z
+		};
 
 
 		//public static Vector3[][] forwardTranslate =
