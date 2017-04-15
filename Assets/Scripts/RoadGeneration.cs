@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts;
@@ -34,19 +33,12 @@ public class RoadGeneration : MonoBehaviour
 		NONE = 100
 	}
 
-	public enum Direction
-	{
-		FORWARD = 0,
-		RIGHT = 1,
-		BACKWARD = 2,
-		LEFT = 3
-	}
-
 	public class PieceEntry
 	{
 		public GameObject piece;
 		public PieceType type;
 		public Direction dir;
+		public Assets.Scripts.Plane plane;
 		public PieceEntry parent;
 		public List<PieceEntry> children;
 		public Vector3 gridPos;
@@ -56,6 +48,7 @@ public class RoadGeneration : MonoBehaviour
 			piece = null;
 			type = PieceType.SIMPLE;
 			dir = Direction.FORWARD;
+			plane = Assets.Scripts.Plane.ZOX;
 			parent = null;
 			children = new List<PieceEntry>();
 			gridPos = Vector3.zero;
@@ -78,13 +71,17 @@ public class RoadGeneration : MonoBehaviour
 		_root.piece.transform.position = Vector3.zero;
 		_root.gridPos = Vector3.zero;
 
+		// ZOX
+		_root.plane = Assets.Scripts.Plane.ZOX;
+		_root.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)_root.plane];
+
 		// XOY
-		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		//_root.piece.transform.eulerAngles = new Vector3(-90 + 90 * 0, -90, 90);
+		//_root.plane = Assets.Scripts.Plane.XOY;
+		//_root.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)_root.plane];
 
 		// YOZ
-		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		_root.piece.transform.eulerAngles = new Vector3(0, -180, 90);
+		//_root.plane = Assets.Scripts.Plane.YOZ;
+		//_root.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)_root.plane];
 
 		_leafs = new List<PieceEntry>();
 		_leafs.Add(_root);
@@ -178,136 +175,53 @@ public class RoadGeneration : MonoBehaviour
 		return Instantiate(simplePiece);
 	}
 
+
 	private PieceEntry CreateAndAddPieceToRoad(PieceEntry parent, PieceType type)
 	{
 		// create the new piece
 		PieceEntry newPiece = new PieceEntry();
 		// set it with the given type
 		newPiece.type = type;
-		
-		int dir = (int)parent.dir;	// newPiece's direction
-		Vector3[] translateXOZ = RoadPositions.forwardTranslateXOZ;
+
+		Direction dir = parent.dir;  // newPiece's direction
+		Vector3[] translate = RoadPositions.forwardTranslate[(int)parent.plane];
+		Vector3 rotation = RoadPositions.rotation[(int)parent.plane];
+
+		// set the newPiece's plane
+		newPiece.plane = parent.plane;
 
 		switch (parent.type)
 		{
 			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
+				dir = DirectionToLeft(parent.dir);
 
-				translateXOZ = RoadPositions.leftTranslateXOZ;
+				translate = RoadPositions.leftTranslate[(int)parent.plane];
 				break;
 
 			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
+				dir = DirectionToRight(parent.dir);
 
-				translateXOZ = RoadPositions.rightTranslateXOZ;
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0)	// first time add the new piece on the parent's left
-				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
-
-					translateXOZ = RoadPositions.leftTranslateXOZ;
-				}
-				else	// second time add the new piece on the parent's right
-				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
-
-					translateXOZ = RoadPositions.rightTranslateXOZ;
-				}
-				break;
-		}
-
-		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
-		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslateXOZ[dir];
-
-		// set the direction
-		newPiece.dir = (Direction)dir;
-
-		// instantiate the piece according with the given type
-		newPiece.piece = InstantiatePiece(type);
-
-		// calculate the newPiece's world position based on the parent's world position
-		int ind = (int)parent.dir;
-		Vector3 offsetTranslate = Vector3.zero;
-		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
-		newPiece.piece.transform.position = parent.piece.transform.position + translateXOZ[ind] + offsetTranslate;
-
-		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		newPiece.piece.transform.eulerAngles = new Vector3(0, -90 + 90 * dir, 0);
-
-
-		// add the newPiece in the parent's list of children
-		parent.children.Add(newPiece);
-
-		// set the newPiece's parent
-		newPiece.parent = parent;
-
-
-		// mark the grid pos as taken
-		_takenPos.Add(newPiece.gridPos);
-		
-		return newPiece;
-	}
-
-	private PieceEntry CreateAndAddPieceToRoadXOY(PieceEntry parent, PieceType type)
-	{
-		// create the new piece
-		PieceEntry newPiece = new PieceEntry();
-		// set it with the given type
-		newPiece.type = type;
-
-		int dir = (int)parent.dir;  // newPiece's direction
-		Vector3[] translateXOY = RoadPositions.forwardTranslateXOY;
-
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
-
-				translateXOY = RoadPositions.leftTranslateXOY;
-				break;
-
-			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
-
-				translateXOY = RoadPositions.rightTranslateXOY;
+				translate = RoadPositions.rightTranslate[(int)parent.plane];
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
 				if (parent.children.Count == 0) // first time add the new piece on the parent's left
 				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
+					dir = DirectionToLeft(parent.dir);
 
-					translateXOY = RoadPositions.leftTranslateXOY;
+					translate = RoadPositions.leftTranslate[(int)parent.plane];
 				}
 				else    // second time add the new piece on the parent's right
 				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
+					dir = DirectionToRight(parent.dir);
 
-					translateXOY = RoadPositions.rightTranslateXOY;
+					translate = RoadPositions.rightTranslate[(int)parent.plane];
 				}
 				break;
 		}
 
 		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
-		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslateXOY[dir];
+		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslate[(int)parent.plane][(int)dir];
 
 		// set the direction
 		newPiece.dir = (Direction)dir;
@@ -319,90 +233,10 @@ public class RoadGeneration : MonoBehaviour
 		int ind = (int)parent.dir;
 		Vector3 offsetTranslate = Vector3.zero;
 		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
-		newPiece.piece.transform.position = parent.piece.transform.position + translateXOY[ind] + offsetTranslate;
+		newPiece.piece.transform.position = parent.piece.transform.position + translate[ind] + offsetTranslate;
 
 		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		newPiece.piece.transform.eulerAngles = new Vector3(-90 - 90 * dir, -90, 90);
-
-
-		// add the newPiece in the parent's list of children
-		parent.children.Add(newPiece);
-
-		// set the newPiece's parent
-		newPiece.parent = parent;
-
-
-		// mark the grid pos as taken
-		_takenPos.Add(newPiece.gridPos);
-
-		return newPiece;
-	}
-
-	private PieceEntry CreateAndAddPieceToRoadYOZ(PieceEntry parent, PieceType type)
-	{
-		// create the new piece
-		PieceEntry newPiece = new PieceEntry();
-		// set it with the given type
-		newPiece.type = type;
-
-		int dir = (int)parent.dir;  // newPiece's direction
-		Vector3[] translateYOZ = RoadPositions.forwardTranslateYOZ;
-
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
-
-				translateYOZ = RoadPositions.leftTranslateYOZ;
-				break;
-
-			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
-
-				translateYOZ = RoadPositions.rightTranslateYOZ;
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0) // first time add the new piece on the parent's left
-				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
-
-					translateYOZ = RoadPositions.leftTranslateYOZ;
-				}
-				else    // second time add the new piece on the parent's right
-				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
-
-					translateYOZ = RoadPositions.rightTranslateYOZ;
-				}
-				break;
-		}
-
-		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
-		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslateYOZ[dir];
-
-		// set the direction
-		newPiece.dir = (Direction)dir;
-
-		// instantiate the piece according with the given type
-		newPiece.piece = InstantiatePiece(type);
-
-		// calculate the newPiece's world position based on the parent's world position
-		int ind = (int)parent.dir;
-		Vector3 offsetTranslate = Vector3.zero;
-		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
-		newPiece.piece.transform.position = parent.piece.transform.position + translateYOZ[ind] + offsetTranslate;
-
-		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		newPiece.piece.transform.eulerAngles = new Vector3(0 - 90 * dir, -180, 90);
+		newPiece.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)newPiece.plane] + rotation * (int)dir;
 
 
 		// add the newPiece in the parent's list of children
@@ -421,123 +255,36 @@ public class RoadGeneration : MonoBehaviour
 	private bool IsEmptyPos(PieceEntry parent, PieceType childType)
 	{
 		// calculate the newPiece's direction
-		int dir = (int)parent.dir;
+		Direction dir = parent.dir;
+		Assets.Scripts.Plane plane = parent.plane;
 		switch (parent.type)
 		{
 			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
+				dir = DirectionToLeft(parent.dir);
 				break;
 
 			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
+				dir = DirectionToRight(parent.dir);
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
 				if (parent.children.Count == 0)
 				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
+					dir = DirectionToLeft(parent.dir);
 				}
 				else
 				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
+					dir = DirectionToRight(parent.dir);
 				}
 				break;
 		}
 
 		// calculate the checking position based on the parent gridPosition and the newPiece's direction
-		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslateXOZ[dir];
+		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslate[(int)plane][(int)dir];
 
 		return !_takenPos.Contains(checkPos);
 	}
-
-	private bool IsEmptyPosXOY(PieceEntry parent, PieceType childType)
-	{
-		// calculate the newPiece's direction
-		int dir = (int)parent.dir;
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
-				break;
-
-			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0)
-				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
-				}
-				else
-				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
-				}
-				break;
-		}
-
-		// calculate the checking position based on the parent gridPosition and the newPiece's direction
-		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslateXOY[dir];
-
-		return !_takenPos.Contains(checkPos);
-	}
-
-	private bool IsEmptyPosYOZ(PieceEntry parent, PieceType childType)
-	{
-		// calculate the newPiece's direction
-		int dir = (int)parent.dir;
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				dir = (int)parent.dir - 1;
-				if (dir < 0)
-					dir = 3;
-				break;
-
-			case PieceType.RIGHT:
-				dir = (int)parent.dir + 1;
-				if (dir > 3)
-					dir = 0;
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0)
-				{
-					dir = (int)parent.dir - 1;
-					if (dir < 0)
-						dir = 3;
-				}
-				else
-				{
-					dir = (int)parent.dir + 1;
-					if (dir > 3)
-						dir = 0;
-				}
-				break;
-		}
-
-		// calculate the checking position based on the parent gridPosition and the newPiece's direction
-		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslateYOZ[dir];
-
-		return !_takenPos.Contains(checkPos);
-	}
-
+	
 
 	private void DebugCreateRuntimeRoad()
 	{
@@ -569,19 +316,19 @@ public class RoadGeneration : MonoBehaviour
 			List<PieceEntry> newLeafs = new List<PieceEntry>();
 			foreach (var pe in _leafs)
 			{
-				if (!IsEmptyPosYOZ(pe, crtType))
+				if (!IsEmptyPos(pe, crtType))
 					continue;
 
-				PieceEntry newPiece = CreateAndAddPieceToRoadYOZ(pe, crtType);
+				PieceEntry newPiece = CreateAndAddPieceToRoad(pe, crtType);
 				_takenPos.Add(newPiece.gridPos);
 				newLeafs.Add(newPiece);
 
 				if (pe.type == PieceType.LEFT_AND_RIGHT)
 				{
-					if (!IsEmptyPosYOZ(pe, crtType))
+					if (!IsEmptyPos(pe, crtType))
 						continue;
 
-					PieceEntry newPiece2 = CreateAndAddPieceToRoadYOZ(pe, crtType);
+					PieceEntry newPiece2 = CreateAndAddPieceToRoad(pe, crtType);
 					_takenPos.Add(newPiece2.gridPos);
 					newLeafs.Add(newPiece2);
 				}
@@ -835,7 +582,7 @@ public class RoadGeneration : MonoBehaviour
 
 		// calculate the newPiece's direction
 		Direction newPieceDir = GetChildDirection(parent.type, parent.dir, relativeToParent);
-		Vector3 newPiecePos = parent.gridPos + RoadPositions.gridTranslateXOZ[(int)newPieceDir];
+		Vector3 newPiecePos = parent.gridPos + RoadPositions.gridTranslate[(int)parent.plane][(int)newPieceDir];
 
 		List<Vector3> childrenGridPos = new List<Vector3>();
 		Direction childDir = newPieceDir;
@@ -843,21 +590,21 @@ public class RoadGeneration : MonoBehaviour
 		switch (type)
 		{
 			case PieceType.SIMPLE:
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslateXOZ[(int)childDir]);
+				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
 				break;
 
 			case PieceType.LEFT:
 			case PieceType.RIGHT:
 				childDir = GetChildDirection(type, newPieceDir);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslateXOZ[(int)childDir]);
+				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
 				childDir = GetChildDirection(type, newPieceDir, Direction.LEFT);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslateXOZ[(int)childDir]);
+				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
 
 				childDir = GetChildDirection(type, newPieceDir, Direction.RIGHT);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslateXOZ[(int)childDir]);
+				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
 				break;
 			default:
 				break;

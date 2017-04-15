@@ -149,9 +149,9 @@ public class GamePlayerController : MonoBehaviour
 
 		switch (thePieceRoadWhereIam.dir)
 		{
-			case RoadGeneration.Direction.FORWARD:
+			case Direction.FORWARD:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
-				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].z / 2;
+				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].z / 2;
 				turningPoint -= RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.z >= turningPoint)
 				{
@@ -159,9 +159,9 @@ public class GamePlayerController : MonoBehaviour
 				}
 				break;
 
-			case RoadGeneration.Direction.RIGHT:
+			case Direction.RIGHT:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
-				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].x / 2;
+				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].x / 2;
 				turningPoint -= RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.x >= turningPoint)
 				{
@@ -169,9 +169,9 @@ public class GamePlayerController : MonoBehaviour
 				}
 				break;
 
-			case RoadGeneration.Direction.BACKWARD:
+			case Direction.BACKWARD:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
-				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].z / 2;
+				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].z / 2;
 				turningPoint += RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.z <= turningPoint)
 				{
@@ -179,9 +179,9 @@ public class GamePlayerController : MonoBehaviour
 				}
 				break;
 
-			case RoadGeneration.Direction.LEFT:
+			case Direction.LEFT:
 				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
-				turningPoint += RoadPositions.forwardTranslateXOZ[(int)thePieceRoadWhereIam.dir].x / 2;
+				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].x / 2;
 				turningPoint += RoadPositions.WIDTH_PIECE;
 				if (this.transform.position.x <= turningPoint)
 				{
