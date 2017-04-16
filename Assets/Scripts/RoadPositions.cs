@@ -30,13 +30,25 @@ namespace Assets.Scripts
 		public static Vector3[] initialRotation =
 		{
 			// ZOX
-			new Vector3(0, -90, 0),
+			new Vector3(0, 0, 0),
 
 			// XOY
-			new Vector3(-90, -90, 90),
+			new Vector3(0, 0, 0),
 
 			// YOZ
-			new Vector3(0, -180, 90)
+			new Vector3(0, 0, 0)
+		};
+
+		public static Vector3[] reverseInitialRotation =
+		{
+			// ZOX
+			new Vector3(0, 0, 0),
+
+			// XOY
+			new Vector3(0, 0, 0),
+
+			// YOZ
+			new Vector3(0, 0, 0)
 		};
 
 		public static Vector3[] rotation =
@@ -45,7 +57,7 @@ namespace Assets.Scripts
 			new Vector3(0, 90, 0),
 
 			// XOY
-			new Vector3(-90, 0, 0),
+			new Vector3(90, 0, 0),
 
 			// YOZ
 			new Vector3(-90, 0, 0)
