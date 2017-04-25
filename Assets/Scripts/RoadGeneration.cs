@@ -29,6 +29,7 @@ public class RoadGeneration : MonoBehaviour
 	public GameObject leftAndRightPiece;
 	public GameObject upPiece;
 	public GameObject downPiece;
+	public GameObject upAndDownPiece;
 
 	public enum PieceType
 	{
@@ -38,8 +39,9 @@ public class RoadGeneration : MonoBehaviour
 		LEFT_AND_RIGHT = 3,
 		UP = 4,
 		DOWN = 5,
+		UP_AND_DOWN = 6,
 
-		COUNT = 6,
+		COUNT = 7,
 		NONE = 100
 	}
 
@@ -187,6 +189,9 @@ public class RoadGeneration : MonoBehaviour
 
 			case PieceType.DOWN:
 				return Instantiate(downPiece);
+
+			case PieceType.UP_AND_DOWN:
+				return Instantiate(upAndDownPiece);
 		}
 
 		return Instantiate(simplePiece);
@@ -490,28 +495,63 @@ public class RoadGeneration : MonoBehaviour
 
 		switch (parent.type)
 		{
-			case PieceType.LEFT:
-				if (parent.upsideDown)
-					dir = DirectionToRight(parent.dir);
-				else
-					dir = DirectionToLeft(parent.dir);
-				break;
+		case PieceType.LEFT:
+			if (parent.upsideDown)
+				dir = DirectionToRight(parent.dir);
+			else
+				dir = DirectionToLeft(parent.dir);
+			break;
 
-			case PieceType.RIGHT:
-				if (parent.upsideDown)
-					dir = DirectionToLeft(parent.dir);
-				else
-					dir = DirectionToRight(parent.dir);
-				break;
+		case PieceType.RIGHT:
+			if (parent.upsideDown)
+				dir = DirectionToLeft(parent.dir);
+			else
+				dir = DirectionToRight(parent.dir);
+			break;
 
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0) // first time add the new piece on the parent's left
-					dir = DirectionToLeft(parent.dir);
-				else
-					dir = DirectionToRight(parent.dir);
-				break;
+		case PieceType.LEFT_AND_RIGHT:
+			if (parent.children.Count == 0) // first time add the new piece on the parent's left
+				dir = DirectionToLeft(parent.dir);
+			else
+				dir = DirectionToRight(parent.dir);
+			break;
 
-			case PieceType.UP:
+		case PieceType.UP:
+			switch (parent.plane)
+			{
+				case Assets.Scripts.Plane.ZOX:
+					CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
+					break;
+
+				case Assets.Scripts.Plane.XOY:
+					CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
+					break;
+
+				case Assets.Scripts.Plane.YOZ:
+					CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
+					break;
+			}
+			break;
+		case PieceType.DOWN:
+			switch (parent.plane)
+			{
+				case Assets.Scripts.Plane.ZOX:
+					CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
+					break;
+
+				case Assets.Scripts.Plane.XOY:
+					CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
+					break;
+
+				case Assets.Scripts.Plane.YOZ:
+					CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
+					break;
+			}
+			break;
+
+		case PieceType.UP_AND_DOWN:
+			if (parent.children.Count == 0)	// first time add the new piece on the parent's up
+			{
 				switch (parent.plane)
 				{
 					case Assets.Scripts.Plane.ZOX:
@@ -526,8 +566,9 @@ public class RoadGeneration : MonoBehaviour
 						CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
 						break;
 				}
-				break;
-			case PieceType.DOWN:
+			}
+			else
+			{
 				switch (parent.plane)
 				{
 					case Assets.Scripts.Plane.ZOX:
@@ -542,7 +583,8 @@ public class RoadGeneration : MonoBehaviour
 						CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
 						break;
 				}
-				break;
+			}
+			break;
 		}
 	}
 
@@ -615,6 +657,23 @@ public class RoadGeneration : MonoBehaviour
 				else
 					translate = RoadPositions.downTranslate[(int)parent.plane];
 				break;
+
+			case PieceType.UP_AND_DOWN:
+				if (parent.children.Count == 0)	// first time add the new piece on the parent's down
+				{
+					if (parent.upsideDown)
+						translate = RoadPositions.downTranslate[(int)parent.plane];
+					else
+						translate = RoadPositions.upTranslate[(int)parent.plane];
+				}
+				else	// second time add the new piece on the parent's right
+				{
+					if (parent.upsideDown)
+						translate = RoadPositions.upTranslate[(int)parent.plane];
+					else
+						translate = RoadPositions.downTranslate[(int)parent.plane];
+				}
+				break;
 		}
 
 		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
@@ -646,32 +705,13 @@ public class RoadGeneration : MonoBehaviour
 		return newPiece;
 	}
 
-	private bool IsEmptyPos(PieceEntry parent, PieceType childType)
+	private bool IsEmptyPos(PieceEntry parent)
 	{
 		// calculate the newPiece's direction
-		Direction dir = parent.dir;
-		Assets.Scripts.Plane plane = parent.plane;
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				dir = DirectionToLeft(parent.dir);
-				break;
-
-			case PieceType.RIGHT:
-				dir = DirectionToRight(parent.dir);
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0)
-				{
-					dir = DirectionToLeft(parent.dir);
-				}
-				else
-				{
-					dir = DirectionToRight(parent.dir);
-				}
-				break;
-		}
+		Direction dir;
+		Assets.Scripts.Plane plane;
+		bool upsideDown;
+		CalculateChildDirAndPlane(parent, out dir, out plane, out upsideDown);
 
 		// calculate the checking position based on the parent gridPosition and the newPiece's direction
 		Vector3 checkPos = parent.gridPos + RoadPositions.gridTranslate[(int)plane][(int)dir];
@@ -714,13 +754,18 @@ public class RoadGeneration : MonoBehaviour
 			Debug.Log("D");
 			crtType = PieceType.DOWN;
 		}
+		else if (Input.GetKeyDown(KeyCode.H))
+		{
+			Debug.Log("H");
+			crtType = PieceType.UP_AND_DOWN;
+		}
 
 		if (crtType != PieceType.NONE)
 		{
 			List<PieceEntry> newLeafs = new List<PieceEntry>();
 			foreach (var pe in _leafs)
 			{
-				if (!IsEmptyPos(pe, crtType))
+				if (!IsEmptyPos(pe))
 					continue;
 
 				PieceEntry newPiece = CreateAndAddPieceToRoad(pe, crtType);
@@ -729,9 +774,12 @@ public class RoadGeneration : MonoBehaviour
 
 				if (pe.type == PieceType.LEFT_AND_RIGHT)
 				{
-					if (!IsEmptyPos(pe, crtType))
-						continue;
-
+					PieceEntry newPiece2 = CreateAndAddPieceToRoad(pe, crtType);
+					_takenPos.Add(newPiece2.gridPos);
+					newLeafs.Add(newPiece2);
+				}
+				else if (pe.type == PieceType.UP_AND_DOWN)
+				{
 					PieceEntry newPiece2 = CreateAndAddPieceToRoad(pe, crtType);
 					_takenPos.Add(newPiece2.gridPos);
 					newLeafs.Add(newPiece2);
