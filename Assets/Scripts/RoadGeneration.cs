@@ -203,11 +203,17 @@ public class RoadGeneration : MonoBehaviour
 		switch (parent.type)
 		{
 			case PieceType.LEFT:
-				dir = DirectionToLeft(parent.dir);
+				if (parent.upsideDown)
+					dir = DirectionToRight(parent.dir);
+				else
+					dir = DirectionToLeft(parent.dir);
 				break;
 
 			case PieceType.RIGHT:
-				dir = DirectionToRight(parent.dir);
+				if (parent.upsideDown)
+					dir = DirectionToLeft(parent.dir);
+				else
+					dir = DirectionToRight(parent.dir);
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
@@ -381,11 +387,17 @@ public class RoadGeneration : MonoBehaviour
 		switch (parent.type)
 		{
 			case PieceType.LEFT:
-				translate = RoadPositions.leftTranslate[(int)parent.plane];
+				if (parent.upsideDown)
+					translate = RoadPositions.rightTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.leftTranslate[(int)parent.plane];
 				break;
 
 			case PieceType.RIGHT:
-				translate = RoadPositions.rightTranslate[(int)parent.plane];
+				if (parent.upsideDown)
+					translate = RoadPositions.leftTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.rightTranslate[(int)parent.plane];
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
