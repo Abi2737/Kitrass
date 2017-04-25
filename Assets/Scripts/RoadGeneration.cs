@@ -784,6 +784,10 @@ public class RoadGeneration : MonoBehaviour
 			Debug.Log("H");
 			crtType = PieceType.UP_AND_DOWN;
 		}
+		else if (Input.GetKeyDown(KeyCode.Space))
+		{
+			AddPiecesToRoad();
+		}
 
 		if (crtType != PieceType.NONE)
 		{
@@ -981,48 +985,6 @@ public class RoadGeneration : MonoBehaviour
 	}
 
 
-	private Direction DirectionToRight(Direction relativeTo)
-	{
-		int resultDir = (int)relativeTo + 1;
-		if (resultDir > 3)
-			resultDir = 0;
-
-		return (Direction)resultDir;
-	}
-
-	private Direction DirectionToLeft(Direction relativeTo)
-	{
-		int resultDir = (int)relativeTo - 1;
-		if (resultDir < 0)
-			resultDir = 3;
-
-		return (Direction)resultDir;
-	}
-
-	private Direction GetChildDirection(PieceType parentType, Direction parentDir, Direction relativeToParent = Direction.FORWARD)
-	{
-		Direction childDir = parentDir;
-		switch (parentType)
-		{
-			case PieceType.LEFT:
-				childDir = DirectionToLeft(parentDir);
-				break;
-
-			case PieceType.RIGHT:
-				childDir = DirectionToRight(parentDir);
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (relativeToParent == Direction.LEFT)
-					childDir = DirectionToLeft(parentDir);
-				else
-					childDir = DirectionToRight(parentDir);
-
-				break;
-		}
-
-		return childDir;
-	}
 
 	private List<PieceType> GetPossibleSpecialPieceTypes(PieceEntry parent)
 	{
@@ -1035,6 +997,22 @@ public class RoadGeneration : MonoBehaviour
 		// poate fi pusa o piesa de tipul RIGHT_PIECE?
 		if (ItCanBeAddedToRoad(parent, PieceType.RIGHT))
 			result.Add(PieceType.RIGHT);
+
+		// poate fi pusa o piesa de tipul LEFT_AND_RIGHT_PIECE?
+		if (ItCanBeAddedToRoad(parent, PieceType.LEFT_AND_RIGHT))
+			result.Add(PieceType.LEFT_AND_RIGHT);
+
+		// poate fi pusa o piesa de tipul UP_PIECE?
+		if (ItCanBeAddedToRoad(parent, PieceType.UP))
+			result.Add(PieceType.UP);
+
+		// poate fi pusa o piesa de tipul DOWN_PIECE?
+		if (ItCanBeAddedToRoad(parent, PieceType.DOWN))
+			result.Add(PieceType.DOWN);
+
+		// poate fi pusa o piesa de tipul UP_AND_DOWN_PIECE?
+		if (ItCanBeAddedToRoad(parent, PieceType.UP_AND_DOWN))
+			result.Add(PieceType.UP_AND_DOWN);
 
 		return result;
 	}
@@ -1052,38 +1030,45 @@ public class RoadGeneration : MonoBehaviour
 
 
 	// relativeToParent matters only if the parent type si LEFT_AND_RIGHT
-	private bool ItCanBeAddedToRoad(PieceEntry parent, PieceType type, Direction relativeToParent = Direction.FORWARD)
+	private bool ItCanBeAddedToRoad(PieceEntry parent, PieceType type)
 	{
 		// parintele este pus si cand a fost pus s-a stiut ca piesele imediat urmatoare (copilul/copii)
 		// se pot pune. Daca adaug piesa curanta de tipul 'type' atunci copilul/copii ei au loc?
 
 		// calculate the newPiece's direction
-		Direction newPieceDir = GetChildDirection(parent.type, parent.dir, relativeToParent);
-		Vector3 newPiecePos = parent.gridPos + RoadPositions.gridTranslate[(int)parent.plane][(int)newPieceDir];
+		PieceEntry newPiece = new PieceEntry();
+		CalculateChildDirAndPlane(parent, out newPiece.dir, out newPiece.plane, out newPiece.upsideDown);
+		newPiece.type = type;
+		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslate[(int)newPiece.plane][(int)newPiece.dir];
 
 		List<Vector3> childrenGridPos = new List<Vector3>();
-		Direction childDir = newPieceDir;
+		Direction childDir = newPiece.dir;
+		Assets.Scripts.Plane childPlane;
+		bool upsideDown;
 
 		switch (type)
 		{
 			case PieceType.SIMPLE:
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
+				childrenGridPos.Add(newPiece.gridPos + RoadPositions.gridTranslate[(int)newPiece.plane][(int)childDir]);
 				break;
 
 			case PieceType.LEFT:
 			case PieceType.RIGHT:
-				childDir = GetChildDirection(type, newPieceDir);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
+			case PieceType.UP:
+			case PieceType.DOWN:
+				CalculateChildDirAndPlane(newPiece, out childDir, out childPlane, out upsideDown);
+				childrenGridPos.Add(newPiece.gridPos + RoadPositions.gridTranslate[(int)childPlane][(int)childDir]);
 				break;
 
 			case PieceType.LEFT_AND_RIGHT:
-				childDir = GetChildDirection(type, newPieceDir, Direction.LEFT);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
+			case PieceType.UP_AND_DOWN:
+				CalculateChildDirAndPlane(newPiece, out childDir, out childPlane, out upsideDown);
+				childrenGridPos.Add(newPiece.gridPos + RoadPositions.gridTranslate[(int)childPlane][(int)childDir]);
 
-				childDir = GetChildDirection(type, newPieceDir, Direction.RIGHT);
-				childrenGridPos.Add(newPiecePos + RoadPositions.gridTranslate[(int)parent.plane][(int)childDir]);
-				break;
-			default:
+				newPiece.children.Add(new PieceEntry());
+
+				CalculateChildDirAndPlane(newPiece, out childDir, out childPlane, out upsideDown);
+				childrenGridPos.Add(newPiece.gridPos + RoadPositions.gridTranslate[(int)childPlane][(int)childDir]);
 				break;
 		}
 
@@ -1111,38 +1096,113 @@ public class RoadGeneration : MonoBehaviour
 					var possiblePieceTypes = GetPossibleSpecialPieceTypes(_leafs[i]);
 					if ( possiblePieceTypes.Count > 0 )
 					{
-						CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
-						_leafs[i] = _leafs[i].children[0];
+						switch (_leafs[i].type)
+						{
+							case PieceType.SIMPLE:
+							case PieceType.LEFT:
+							case PieceType.RIGHT:
+							case PieceType.UP:
+							case PieceType.DOWN:
+								_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+								break;
+
+							case PieceType.LEFT_AND_RIGHT:
+							case PieceType.UP_AND_DOWN:
+								CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+								Debug.Log("1: " + _leafs[i].children.Count);
+								CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+								Debug.Log("1: " + _leafs[i].children.Count);
+								_leafs.Add(_leafs[i].children[1]);
+								_leafs[i] = _leafs[i].children[0];
+								Debug.Log("_");
+								break;
+						}
 					}
 					else if (ItCanBeAddedToRoad(_leafs[i], PieceType.SIMPLE))
 					{
-						CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
-						_leafs[i] = _leafs[i].children[0];
+						switch (_leafs[i].type)
+						{
+							case PieceType.SIMPLE:
+							case PieceType.LEFT:
+							case PieceType.RIGHT:
+							case PieceType.UP:
+							case PieceType.DOWN:
+								_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								break;
+
+							case PieceType.LEFT_AND_RIGHT:
+							case PieceType.UP_AND_DOWN:
+								CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								Debug.Log("2: " + _leafs[i].children.Count);
+								CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								Debug.Log("2: " + _leafs[i].children.Count);
+								_leafs.Add(_leafs[i].children[1]);
+								_leafs[i] = _leafs[i].children[0];
+								Debug.Log("_");
+								break;
+						}
 					}
 					else
 					{
 						Debug.Log("COLLISION");
-						//_leafs[i] = HandlePieceToPieceCollision(_leafs[i]);
 					}
 				}
 				else
 				{
 					if (ItCanBeAddedToRoad(_leafs[i], PieceType.SIMPLE))
 					{
-						CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
-						_leafs[i] = _leafs[i].children[0];
+						switch (_leafs[i].type)
+						{
+							case PieceType.SIMPLE:
+							case PieceType.LEFT:
+							case PieceType.RIGHT:
+							case PieceType.UP:
+							case PieceType.DOWN:
+								_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								break;
+
+							case PieceType.LEFT_AND_RIGHT:
+							case PieceType.UP_AND_DOWN:
+								CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								Debug.Log("3: " + _leafs[i].children.Count);
+								CreateAndAddPieceToRoad(_leafs[i], PieceType.SIMPLE);
+								Debug.Log("3: " + _leafs[i].children.Count);
+								_leafs.Add(_leafs[i].children[1]);
+								_leafs[i] = _leafs[i].children[0];
+								Debug.Log("_");
+								break;
+						}
 					}
 					else
 					{
 						var possiblePieceTypes = GetPossibleSpecialPieceTypes(_leafs[i]);
 						if (possiblePieceTypes.Count > 0)
 						{
-							_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+							switch (_leafs[i].type)
+							{
+								case PieceType.SIMPLE:
+								case PieceType.LEFT:
+								case PieceType.RIGHT:
+								case PieceType.UP:
+								case PieceType.DOWN:
+									_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+									break;
+
+								case PieceType.LEFT_AND_RIGHT:
+								case PieceType.UP_AND_DOWN:
+									CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+									Debug.Log("4: " + _leafs[i].children.Count);
+									CreateAndAddPieceToRoad(_leafs[i], possiblePieceTypes[rnd.Next(possiblePieceTypes.Count)]);
+									Debug.Log("4: " + _leafs[i].children.Count);
+									_leafs.Add(_leafs[i].children[1]);
+									_leafs[i] = _leafs[i].children[0];
+									Debug.Log("_");
+									break;
+							}
 						}
 						else
 						{
 							Debug.Log("COLLISION");
-							//_leafs[i] = HandlePieceToPieceCollision(_leafs[i]);
 						}
 					}
 				}
