@@ -197,6 +197,30 @@ public class RoadGeneration : MonoBehaviour
 		return Instantiate(simplePiece);
 	}
 
+	private void CalculateChildDirAndPlaneForParentRightPiece(PieceEntry parent, out Direction dir, 
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		if (parent.dir == Direction.LEFT)
+			dir = Direction.FORWARD;
+		else
+			dir = (Direction)((int)parent.dir + 1);
+
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+	}
+
+	private void CalculateChildDirAndPlaneForParentLeftPiece(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		if (parent.dir == Direction.FORWARD)
+			dir = Direction.LEFT;
+		else 
+			dir = (Direction)((int)parent.dir - 1);
+
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+	}
+	
 	private void CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(PieceEntry parent, out Direction dir,
 		out Assets.Scripts.Plane plane, out bool upsideDown)
 	{
@@ -340,7 +364,6 @@ public class RoadGeneration : MonoBehaviour
 				break;
 		}
 	}
-
 
 	private void CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(PieceEntry parent, out Direction dir,
 		out Assets.Scripts.Plane plane, out bool upsideDown)
@@ -486,6 +509,53 @@ public class RoadGeneration : MonoBehaviour
 		}
 	}
 
+	private void CalculateChildDirAndPlaneForParentUpPiece(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown; 
+
+		switch (parent.plane)
+		{
+			case Assets.Scripts.Plane.ZOX:
+				CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
+				break;
+
+			case Assets.Scripts.Plane.XOY:
+				CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
+				break;
+				
+			case Assets.Scripts.Plane.YOZ:
+				CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
+				break;
+		}
+	}
+
+	private void CalculateChildDirAndPlaneForParentDownPiece(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		switch (parent.plane)
+		{
+			case Assets.Scripts.Plane.ZOX:
+				CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
+				break;
+
+			case Assets.Scripts.Plane.XOY:
+				CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
+				break;
+
+			case Assets.Scripts.Plane.YOZ:
+				CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
+				break;
+		}
+	}
+
+
 	private void CalculateChildDirAndPlane(PieceEntry parent, out Direction dir, out Assets.Scripts.Plane plane, 
 		out bool upsideDown)
 	{
@@ -497,95 +567,114 @@ public class RoadGeneration : MonoBehaviour
 		{
 		case PieceType.LEFT:
 			if (parent.upsideDown)
-				dir = DirectionToRight(parent.dir);
+				CalculateChildDirAndPlaneForParentRightPiece(parent, out dir, out plane, out upsideDown);
 			else
-				dir = DirectionToLeft(parent.dir);
+				CalculateChildDirAndPlaneForParentLeftPiece(parent, out dir, out plane, out upsideDown);
 			break;
 
 		case PieceType.RIGHT:
 			if (parent.upsideDown)
-				dir = DirectionToLeft(parent.dir);
+				CalculateChildDirAndPlaneForParentLeftPiece(parent, out dir, out plane, out upsideDown);
 			else
-				dir = DirectionToRight(parent.dir);
+				CalculateChildDirAndPlaneForParentRightPiece(parent, out dir, out plane, out upsideDown);
 			break;
 
 		case PieceType.LEFT_AND_RIGHT:
 			if (parent.children.Count == 0) // first time add the new piece on the parent's left
-				dir = DirectionToLeft(parent.dir);
+				CalculateChildDirAndPlaneForParentLeftPiece(parent, out dir, out plane, out upsideDown);
 			else
-				dir = DirectionToRight(parent.dir);
+				CalculateChildDirAndPlaneForParentRightPiece(parent, out dir, out plane, out upsideDown);
 			break;
 
 		case PieceType.UP:
-			switch (parent.plane)
-			{
-				case Assets.Scripts.Plane.ZOX:
-					CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
-					break;
-
-				case Assets.Scripts.Plane.XOY:
-					CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
-					break;
-
-				case Assets.Scripts.Plane.YOZ:
-					CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
-					break;
-			}
+			CalculateChildDirAndPlaneForParentUpPiece(parent, out dir, out plane, out upsideDown);
 			break;
+
 		case PieceType.DOWN:
-			switch (parent.plane)
-			{
-				case Assets.Scripts.Plane.ZOX:
-					CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
-					break;
-
-				case Assets.Scripts.Plane.XOY:
-					CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
-					break;
-
-				case Assets.Scripts.Plane.YOZ:
-					CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
-					break;
-			}
+			CalculateChildDirAndPlaneForParentDownPiece(parent, out dir, out plane, out upsideDown);
 			break;
 
 		case PieceType.UP_AND_DOWN:
 			if (parent.children.Count == 0)	// first time add the new piece on the parent's up
 			{
-				switch (parent.plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
-						break;
-
-					case Assets.Scripts.Plane.XOY:
-						CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
-						break;
-
-					case Assets.Scripts.Plane.YOZ:
-						CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
-						break;
-				}
+				CalculateChildDirAndPlaneForParentUpPiece(parent, out dir, out plane, out upsideDown);
 			}
 			else
 			{
-				switch (parent.plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
-						break;
-
-					case Assets.Scripts.Plane.XOY:
-						CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
-						break;
-
-					case Assets.Scripts.Plane.YOZ:
-						CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
-						break;
-				}
+				CalculateChildDirAndPlaneForParentDownPiece(parent, out dir, out plane, out upsideDown);
 			}
 			break;
 		}
+	}
+
+	private Vector3 CalculateChildPosition(PieceEntry parent)
+	{
+		Vector3[] translate = RoadPositions.forwardTranslate[(int)parent.plane];
+
+		switch (parent.type)
+		{
+		case PieceType.LEFT:
+			if (parent.upsideDown)
+				translate = RoadPositions.rightTranslate[(int)parent.plane];
+			else
+				translate = RoadPositions.leftTranslate[(int)parent.plane];
+			break;
+
+		case PieceType.RIGHT:
+			if (parent.upsideDown)
+				translate = RoadPositions.leftTranslate[(int)parent.plane];
+			else
+				translate = RoadPositions.rightTranslate[(int)parent.plane];
+			break;
+
+		case PieceType.LEFT_AND_RIGHT:
+			if (parent.children.Count == 0) // first time add the new piece on the parent's left
+			{
+				translate = RoadPositions.leftTranslate[(int)parent.plane];
+			}
+			else    // second time add the new piece on the parent's right
+			{
+				translate = RoadPositions.rightTranslate[(int)parent.plane];
+			}
+			break;
+
+		case PieceType.UP:
+			if (parent.upsideDown)
+				translate = RoadPositions.downTranslate[(int)parent.plane];
+			else
+				translate = RoadPositions.upTranslate[(int)parent.plane];
+			break;
+
+		case PieceType.DOWN:
+			if (parent.upsideDown)
+				translate = RoadPositions.upTranslate[(int)parent.plane];
+			else
+				translate = RoadPositions.downTranslate[(int)parent.plane];
+			break;
+
+		case PieceType.UP_AND_DOWN:
+			if (parent.children.Count == 0) // first time add the new piece on the parent's down
+			{
+				if (parent.upsideDown)
+					translate = RoadPositions.downTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.upTranslate[(int)parent.plane];
+			}
+			else    // second time add the new piece on the parent's right
+			{
+				if (parent.upsideDown)
+					translate = RoadPositions.upTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.downTranslate[(int)parent.plane];
+			}
+			break;
+		}
+
+		// calculate the newPiece's world position based on the parent's world position
+		Vector3 offsetTranslate = Vector3.zero;
+		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
+
+		return parent.piece.transform.position + translate[(int)parent.dir] + offsetTranslate;
 	}
 
 	private PieceEntry CreateAndAddPieceToRoad(PieceEntry parent, PieceType type)
@@ -610,83 +699,19 @@ public class RoadGeneration : MonoBehaviour
 		// set the newPiece's upsideDown
 		newPiece.upsideDown = upsideDown;
 
-		Vector3[] translate = RoadPositions.forwardTranslate[(int)parent.plane];
-		Vector3 rotation = RoadPositions.rotation[(int)plane];
-		Vector3 initRotation = RoadPositions.initialRotation[(int)plane];
-		if (upsideDown)
-			initRotation = RoadPositions.upsideDownInitialRotation[(int)plane];
-
-
-		switch (parent.type)
-		{
-			case PieceType.LEFT:
-				if (parent.upsideDown)
-					translate = RoadPositions.rightTranslate[(int)parent.plane];
-				else
-					translate = RoadPositions.leftTranslate[(int)parent.plane];
-				break;
-
-			case PieceType.RIGHT:
-				if (parent.upsideDown)
-					translate = RoadPositions.leftTranslate[(int)parent.plane];
-				else
-					translate = RoadPositions.rightTranslate[(int)parent.plane];
-				break;
-
-			case PieceType.LEFT_AND_RIGHT:
-				if (parent.children.Count == 0) // first time add the new piece on the parent's left
-				{
-					translate = RoadPositions.leftTranslate[(int)parent.plane];
-				}
-				else    // second time add the new piece on the parent's right
-				{
-					translate = RoadPositions.rightTranslate[(int)parent.plane];
-				}
-				break;
-
-			case PieceType.UP:
-				if (parent.upsideDown)
-					translate = RoadPositions.downTranslate[(int)parent.plane];
-				else
-					translate = RoadPositions.upTranslate[(int)parent.plane];
-				break;
-
-			case PieceType.DOWN:
-				if (parent.upsideDown)
-					translate = RoadPositions.upTranslate[(int)parent.plane];
-				else
-					translate = RoadPositions.downTranslate[(int)parent.plane];
-				break;
-
-			case PieceType.UP_AND_DOWN:
-				if (parent.children.Count == 0)	// first time add the new piece on the parent's down
-				{
-					if (parent.upsideDown)
-						translate = RoadPositions.downTranslate[(int)parent.plane];
-					else
-						translate = RoadPositions.upTranslate[(int)parent.plane];
-				}
-				else	// second time add the new piece on the parent's right
-				{
-					if (parent.upsideDown)
-						translate = RoadPositions.upTranslate[(int)parent.plane];
-					else
-						translate = RoadPositions.downTranslate[(int)parent.plane];
-				}
-				break;
-		}
-
 		// calculate the newPiece's grid position based on the parent's grid position and the newPiece's direction
 		newPiece.gridPos = parent.gridPos + RoadPositions.gridTranslate[(int)plane][(int)dir];
-
 
 		// instantiate the piece according with the given type
 		newPiece.piece = InstantiatePiece(type);
 
 		// calculate the newPiece's world position based on the parent's world position
-		Vector3 offsetTranslate = Vector3.zero;
-		//Vector3 offsetTranslate = RoadPositions.forwardTranslateXOZoffset[(int)dir];
-		newPiece.piece.transform.position = parent.piece.transform.position + translate[(int)parent.dir] + offsetTranslate;
+		newPiece.piece.transform.position = CalculateChildPosition(parent);
+		
+		Vector3 rotation = RoadPositions.rotation[(int)plane];
+		Vector3 initRotation = RoadPositions.initialRotation[(int)plane];
+		if (upsideDown)
+			initRotation = RoadPositions.upsideDownInitialRotation[(int)plane];
 
 		// set the newPiece's rotation (-90 initial rotation of the prefab)
 		newPiece.piece.transform.eulerAngles = initRotation + rotation * (int)dir;
