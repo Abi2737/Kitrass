@@ -192,6 +192,294 @@ public class RoadGeneration : MonoBehaviour
 		return Instantiate(simplePiece);
 	}
 
+	private void CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == ZOX
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = false;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = true;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = true;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = false;
+				break;
+		}
+	}
+
+	private void CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == XOY
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = true;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = false;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = false;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = true;
+				break;
+		}
+	}
+
+	private void CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == YOZ
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = true;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = false;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = false;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = true;
+				break;
+		}
+	}
+
+
+	private void CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == ZOX
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = true;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = false;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = false;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = true;
+				break;
+		}
+	}
+
+	private void CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == XOY
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = false;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.YOZ;
+				if (upsideDown)
+					dir = Direction.LEFT;
+				else
+					dir = Direction.RIGHT;
+				upsideDown = true;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = true;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.BACKWARD;
+				else
+					dir = Direction.FORWARD;
+				upsideDown = false;
+				break;
+		}
+	}
+
+	private void CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(PieceEntry parent, out Direction dir,
+		out Assets.Scripts.Plane plane, out bool upsideDown)
+	{
+		dir = parent.dir;
+		plane = parent.plane;
+		upsideDown = parent.upsideDown;
+
+		// parent.plane == YOZ
+		switch (parent.dir)
+		{
+			case Direction.FORWARD:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = false;
+				break;
+
+			case Direction.BACKWARD:
+				plane = Assets.Scripts.Plane.ZOX;
+				if (upsideDown)
+					dir = Direction.RIGHT;
+				else
+					dir = Direction.LEFT;
+				upsideDown = true;
+				break;
+
+			case Direction.RIGHT:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = true;
+				break;
+
+			case Direction.LEFT:
+				plane = Assets.Scripts.Plane.XOY;
+				if (upsideDown)
+					dir = Direction.FORWARD;
+				else
+					dir = Direction.BACKWARD;
+				upsideDown = false;
+				break;
+		}
+	}
 
 	private void CalculateChildDirAndPlane(PieceEntry parent, out Direction dir, out Assets.Scripts.Plane plane, 
 		out bool upsideDown)
@@ -227,130 +515,33 @@ public class RoadGeneration : MonoBehaviour
 				switch (parent.plane)
 				{
 					case Assets.Scripts.Plane.ZOX:
-						switch (parent.dir)
-						{
-							case Direction.FORWARD:
-								plane = Assets.Scripts.Plane.XOY;
-								if (upsideDown)
-									dir = Direction.RIGHT;
-								else
-									dir = Direction.LEFT;
-								upsideDown = false;
-								break;
-
-							case Direction.BACKWARD:
-								plane = Assets.Scripts.Plane.XOY;
-								if (upsideDown)
-									dir = Direction.RIGHT;
-								else
-									dir = Direction.LEFT;
-								upsideDown = true;
-								break;
-
-							case Direction.RIGHT:
-								plane = Assets.Scripts.Plane.YOZ;
-								if (upsideDown)
-									dir = Direction.BACKWARD;
-								else
-									dir = Direction.FORWARD;
-								upsideDown = true;
-								break;
-
-							case Direction.LEFT:
-								plane = Assets.Scripts.Plane.YOZ;
-								if (upsideDown)
-									dir = Direction.BACKWARD;
-								else
-									dir = Direction.FORWARD;
-								upsideDown = false;
-								break;
-						}
+						CalculateChildDirAndPlaneForParentUpPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
 						break;
 
 					case Assets.Scripts.Plane.XOY:
-						switch (parent.dir)
-						{
-							case Direction.FORWARD:
-								plane = Assets.Scripts.Plane.YOZ;
-								if (upsideDown)
-									dir = Direction.RIGHT;
-								else
-									dir = Direction.LEFT;
-								upsideDown = true;
-								break;
-
-							case Direction.BACKWARD:
-								plane = Assets.Scripts.Plane.YOZ;
-								if (upsideDown)
-									dir = Direction.RIGHT;
-								else
-									dir = Direction.LEFT;
-								upsideDown = false;
-								break;
-
-							case Direction.RIGHT:
-								plane = Assets.Scripts.Plane.ZOX;
-								if (upsideDown)
-									dir = Direction.FORWARD;
-								else
-									dir = Direction.BACKWARD;
-								upsideDown = false;
-								break;
-
-							case Direction.LEFT:
-								plane = Assets.Scripts.Plane.ZOX;
-								if (upsideDown)
-									dir = Direction.FORWARD;
-								else
-									dir = Direction.BACKWARD;
-								upsideDown = true;
-								break;
-						}
+						CalculateChildDirAndPlaneForParentUpPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
 						break;
 
 					case Assets.Scripts.Plane.YOZ:
-						switch (parent.dir)
-						{
-							case Direction.FORWARD:
-								plane = Assets.Scripts.Plane.ZOX;
-								if (upsideDown)
-									dir = Direction.LEFT;
-								else
-									dir = Direction.RIGHT;
-								upsideDown = true;
-								break;
-
-							case Direction.BACKWARD:
-								plane = Assets.Scripts.Plane.ZOX;
-								if (upsideDown)
-									dir = Direction.LEFT;
-								else
-									dir = Direction.RIGHT;
-								upsideDown = false;
-								break;
-
-							case Direction.RIGHT:
-								plane = Assets.Scripts.Plane.XOY;
-								if (upsideDown)
-									dir = Direction.BACKWARD;
-								else
-									dir = Direction.FORWARD;
-								upsideDown = false;
-								break;
-
-							case Direction.LEFT:
-								plane = Assets.Scripts.Plane.XOY;
-								if (upsideDown)
-									dir = Direction.BACKWARD;
-								else
-									dir = Direction.FORWARD;
-								upsideDown = true;
-								break;
-						}
+						CalculateChildDirAndPlaneForParentUpPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
 						break;
 				}
 				break;
 			case PieceType.DOWN:
+				switch (parent.plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						CalculateChildDirAndPlaneForParentDownPiecePlaneZOX(parent, out dir, out plane, out upsideDown);
+						break;
+
+					case Assets.Scripts.Plane.XOY:
+						CalculateChildDirAndPlaneForParentDownPiecePlaneXOY(parent, out dir, out plane, out upsideDown);
+						break;
+
+					case Assets.Scripts.Plane.YOZ:
+						CalculateChildDirAndPlaneForParentDownPiecePlaneYOZ(parent, out dir, out plane, out upsideDown);
+						break;
+				}
 				break;
 		}
 	}
@@ -419,7 +610,10 @@ public class RoadGeneration : MonoBehaviour
 				break;
 
 			case PieceType.DOWN:
-				translate = RoadPositions.downTranslate[(int)parent.plane];
+				if (parent.upsideDown)
+					translate = RoadPositions.upTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.downTranslate[(int)parent.plane];
 				break;
 		}
 
