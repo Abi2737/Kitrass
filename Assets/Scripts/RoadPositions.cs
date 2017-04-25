@@ -39,16 +39,16 @@ namespace Assets.Scripts
 			new Vector3(-90, 0, -90)
 		};
 
-		public static Vector3[] reverseInitialRotation =
+		public static Vector3[] upsideDownInitialRotation =
 		{
 			// ZOX
-			new Vector3(0, 0, 0),
+			new Vector3(0, 0, 180),
 
 			// XOY
-			new Vector3(0, 90, -90),
+			new Vector3(0, 90, 90),
 
 			// YOZ
-			new Vector3(-90, 0, -90)
+			new Vector3(-90, 0, 90)
 		};
 
 		public static Vector3[] rotation =

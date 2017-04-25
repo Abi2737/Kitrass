@@ -49,6 +49,7 @@ public class RoadGeneration : MonoBehaviour
 		public PieceType type;
 		public Direction dir;
 		public Assets.Scripts.Plane plane;
+		public bool upsideDown;
 		public PieceEntry parent;
 		public List<PieceEntry> children;
 		public Vector3 gridPos;
@@ -59,6 +60,7 @@ public class RoadGeneration : MonoBehaviour
 			type = PieceType.SIMPLE;
 			dir = Direction.FORWARD;
 			plane = Assets.Scripts.Plane.ZOX;
+			upsideDown = false; 
 			parent = null;
 			children = new List<PieceEntry>();
 			gridPos = Vector3.zero;
@@ -191,10 +193,12 @@ public class RoadGeneration : MonoBehaviour
 	}
 
 
-	private void CalculateChildDirAndPlane(PieceEntry parent, out Direction dir, out Assets.Scripts.Plane plane)
+	private void CalculateChildDirAndPlane(PieceEntry parent, out Direction dir, out Assets.Scripts.Plane plane, 
+		out bool upsideDown)
 	{
 		dir = parent.dir;
 		plane = parent.plane;
+		upsideDown = parent.upsideDown;
 
 		switch (parent.type)
 		{
@@ -220,15 +224,39 @@ public class RoadGeneration : MonoBehaviour
 						switch (parent.dir)
 						{
 							case Direction.FORWARD:
+								plane = Assets.Scripts.Plane.XOY;
+								if (upsideDown)
+									dir = Direction.RIGHT;
+								else
+									dir = Direction.LEFT;
+								upsideDown = false;
+								break;
+
 							case Direction.BACKWARD:
 								plane = Assets.Scripts.Plane.XOY;
-								dir = Direction.LEFT;
+								if (upsideDown)
+									dir = Direction.RIGHT;
+								else
+									dir = Direction.LEFT;
+								upsideDown = true;
 								break;
 
 							case Direction.RIGHT:
+								plane = Assets.Scripts.Plane.YOZ;
+								if (upsideDown)
+									dir = Direction.BACKWARD;
+								else
+									dir = Direction.FORWARD;
+								upsideDown = true;
+								break;
+
 							case Direction.LEFT:
 								plane = Assets.Scripts.Plane.YOZ;
-								dir = Direction.FORWARD;
+								if (upsideDown)
+									dir = Direction.BACKWARD;
+								else
+									dir = Direction.FORWARD;
+								upsideDown = false;
 								break;
 						}
 						break;
@@ -237,15 +265,39 @@ public class RoadGeneration : MonoBehaviour
 						switch (parent.dir)
 						{
 							case Direction.FORWARD:
+								plane = Assets.Scripts.Plane.YOZ;
+								if (upsideDown)
+									dir = Direction.RIGHT;
+								else
+									dir = Direction.LEFT;
+								upsideDown = true;
+								break;
+
 							case Direction.BACKWARD:
 								plane = Assets.Scripts.Plane.YOZ;
-								dir = Direction.LEFT;
+								if (upsideDown)
+									dir = Direction.RIGHT;
+								else
+									dir = Direction.LEFT;
+								upsideDown = false;
 								break;
 
 							case Direction.RIGHT:
+								plane = Assets.Scripts.Plane.ZOX;
+								if (upsideDown)
+									dir = Direction.FORWARD;
+								else
+									dir = Direction.BACKWARD;
+								upsideDown = false;
+								break;
+
 							case Direction.LEFT:
 								plane = Assets.Scripts.Plane.ZOX;
-								dir = Direction.BACKWARD;
+								if (upsideDown)
+									dir = Direction.FORWARD;
+								else
+									dir = Direction.BACKWARD;
+								upsideDown = true;
 								break;
 						}
 						break;
@@ -254,15 +306,39 @@ public class RoadGeneration : MonoBehaviour
 						switch (parent.dir)
 						{
 							case Direction.FORWARD:
+								plane = Assets.Scripts.Plane.ZOX;
+								if (upsideDown)
+									dir = Direction.LEFT;
+								else
+									dir = Direction.RIGHT;
+								upsideDown = true;
+								break;
+
 							case Direction.BACKWARD:
 								plane = Assets.Scripts.Plane.ZOX;
-								dir = Direction.RIGHT;
+								if (upsideDown)
+									dir = Direction.LEFT;
+								else
+									dir = Direction.RIGHT;
+								upsideDown = false;
 								break;
 
 							case Direction.RIGHT:
+								plane = Assets.Scripts.Plane.XOY;
+								if (upsideDown)
+									dir = Direction.BACKWARD;
+								else
+									dir = Direction.FORWARD;
+								upsideDown = false;
+								break;
+
 							case Direction.LEFT:
 								plane = Assets.Scripts.Plane.XOY;
-								dir = Direction.FORWARD;
+								if (upsideDown)
+									dir = Direction.BACKWARD;
+								else
+									dir = Direction.FORWARD;
+								upsideDown = true;
 								break;
 						}
 						break;
@@ -280,10 +356,11 @@ public class RoadGeneration : MonoBehaviour
 		// set it with the given type
 		newPiece.type = type;
 
-		Direction dir;  // newPiece's direction
+		Direction dir;				// newPiece's direction
 		Assets.Scripts.Plane plane; // newPiece's plane
+		bool upsideDown;			// newPiece's upsideDown
 		
-		CalculateChildDirAndPlane(parent, out dir, out plane);
+		CalculateChildDirAndPlane(parent, out dir, out plane, out upsideDown);
 
 		// set the direction
 		newPiece.dir = dir;
@@ -291,9 +368,15 @@ public class RoadGeneration : MonoBehaviour
 		// set the newPiece's plane
 		newPiece.plane = plane;
 
+		// set the newPiece's upsideDown
+		newPiece.upsideDown = upsideDown;
 
 		Vector3[] translate = RoadPositions.forwardTranslate[(int)parent.plane];
 		Vector3 rotation = RoadPositions.rotation[(int)plane];
+		Vector3 initRotation = RoadPositions.initialRotation[(int)plane];
+		if (upsideDown)
+			initRotation = RoadPositions.upsideDownInitialRotation[(int)plane];
+
 
 		switch (parent.type)
 		{
@@ -317,7 +400,14 @@ public class RoadGeneration : MonoBehaviour
 				break;
 
 			case PieceType.UP:
-				translate = RoadPositions.upTranslate[(int)parent.plane];
+				if (parent.upsideDown)
+					translate = RoadPositions.downTranslate[(int)parent.plane];
+				else
+					translate = RoadPositions.upTranslate[(int)parent.plane];
+				break;
+
+			case PieceType.DOWN:
+				translate = RoadPositions.downTranslate[(int)parent.plane];
 				break;
 		}
 
@@ -334,7 +424,7 @@ public class RoadGeneration : MonoBehaviour
 		newPiece.piece.transform.position = parent.piece.transform.position + translate[(int)parent.dir] + offsetTranslate;
 
 		// set the newPiece's rotation (-90 initial rotation of the prefab)
-		newPiece.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)plane] + rotation * (int)dir;
+		newPiece.piece.transform.eulerAngles = initRotation + rotation * (int)dir;
 
 
 		// add the newPiece in the parent's list of children
@@ -412,6 +502,11 @@ public class RoadGeneration : MonoBehaviour
 		{
 			Debug.Log('U');
 			crtType = PieceType.UP;
+		}
+		else if (Input.GetKeyDown(KeyCode.D))
+		{
+			Debug.Log("D");
+			crtType = PieceType.DOWN;
 		}
 
 		if (crtType != PieceType.NONE)
