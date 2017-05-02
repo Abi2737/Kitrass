@@ -117,12 +117,13 @@ public class RoadGeneration : MonoBehaviour
 
 		_rnd = new System.Random();
 
-		//DebugCreateInitialRoad();
+		DebugCreateInitialRoad();
+		
 		//DebugCreateInitialStraightRoad(20);
 		//DebugCreateInitialOneRightPieceRoad(4, 1);
 		//DebugCreateInitialOneLeftPieceRoad(4, 1);
 
-		AddPiecesToRoad();
+		//AddPiecesToRoad();
 	}
 
 	// Use this for initialization
@@ -828,7 +829,7 @@ public class RoadGeneration : MonoBehaviour
 		PieceEntry p10 = CreateAndAddPieceToRoad(p9, PieceType.SIMPLE);
 
 		PieceEntry p11 = CreateAndAddPieceToRoad(p3, PieceType.SIMPLE);
-		PieceEntry p12 = CreateAndAddPieceToRoad(p11, PieceType.LEFT_AND_RIGHT);
+		PieceEntry p12 = CreateAndAddPieceToRoad(p11, PieceType.UP_AND_DOWN);
 		PieceEntry p13 = CreateAndAddPieceToRoad(p12, PieceType.RIGHT);
 		PieceEntry p14 = CreateAndAddPieceToRoad(p13, PieceType.RIGHT);
 		PieceEntry p15 = CreateAndAddPieceToRoad(p14, PieceType.SIMPLE);

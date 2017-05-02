@@ -23,77 +23,72 @@ public class GamePlayerController : MonoBehaviour
 		public float inputDelay = 0.1f;
 		public string VERTICAL_AXIS = "PlayerVertical";
 		public string HORIZONTAL_AXIS = "PlayerHorizontal";
-		public string DEPTH_AXIS = "PlayerDepth";
-		public string TURN_AXIS = "Horizontal";
 	}
 
 	public MoveSettings moveSettings = new MoveSettings();
 	public InputSettings inputSettings = new InputSettings();
 
-	Vector3 velocity = Vector3.zero;
-	Quaternion targetRotation;
-	Rigidbody rBody;
-	float verticalInput, horizontalInput, turnInput;
-	float depthInput;
+	Vector3 _velocity = Vector3.zero;
+	Quaternion _targetRotation;
+	Rigidbody _rBody;
+	float _verticalInput, _horizontalInput;
+
+	bool _turnLeft, _turnRight;
+	bool _turnUp, _turnDown;
 
 
 
-	RoadGeneration.PieceEntry thePieceRoadWhereIam;
-	int indChildNextPiece;
-	bool pieceRoadChanged, rotatedOnSpecialPiece;
+	RoadGeneration.PieceEntry _thePieceRoadWhereIam;
+	bool _pieceRoadChanged;
 
-	float playerRotation;
+	Vector3 _playerAngle;
 
 	private void Start()
 	{
-		targetRotation = transform.rotation;
+		_targetRotation = transform.rotation;
 
 		if (GetComponent<Rigidbody>())
-			rBody = GetComponent<Rigidbody>();
+			_rBody = GetComponent<Rigidbody>();
 		else
 			Debug.LogError("No rigidbody!");
 
-		verticalInput = horizontalInput = turnInput = 0;
-		depthInput = 0;
+		_verticalInput = _horizontalInput = 0;
 
+		_turnLeft = _turnRight = _turnUp = _turnDown = false;
 
-		thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetRoadRoot();
-		indChildNextPiece = 0;
-		pieceRoadChanged = false;
-		rotatedOnSpecialPiece = false;
+		_playerAngle = Vector3.zero;
 
-		playerRotation = 0;
+		_thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetRoadRoot();
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
 		//Debug.Log(this.name + " trigger: othName: " + other.name);
 
-		if (!pieceRoadChanged)
+		if (!_pieceRoadChanged)
 		{
-			pieceRoadChanged = true;
-			rotatedOnSpecialPiece = false;
+			_pieceRoadChanged = true;
 
-			if (indChildNextPiece < thePieceRoadWhereIam.children.Count)
-				thePieceRoadWhereIam = thePieceRoadWhereIam.children[indChildNextPiece];
+			//_thePieceRoadWhereIam = _thePieceRoadWhereIam.children[_indChildNextPiece];
 
-			Debug.Log("TG: " + thePieceRoadWhereIam.piece.transform.position + " type: " + thePieceRoadWhereIam.type);
+			//Debug.Log("TG: " + _thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
 		}
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
-		pieceRoadChanged = false;
+		_pieceRoadChanged = false;
 	}
 
 	private void GetInput()
 	{
-		verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
-		horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
+		_verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
+		_horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
 
-		depthInput = Input.GetAxis(inputSettings.DEPTH_AXIS);
-
-		turnInput = Input.GetAxis(inputSettings.TURN_AXIS);
+		_turnLeft = Input.GetKeyDown(KeyCode.LeftArrow);
+		_turnRight = Input.GetKeyDown(KeyCode.RightArrow);
+		_turnUp = Input.GetKeyDown(KeyCode.UpArrow);
+		_turnDown = Input.GetKeyDown(KeyCode.DownArrow);
 	}
 
 	private void Update()
@@ -106,119 +101,43 @@ public class GamePlayerController : MonoBehaviour
 		MoveForward();
 		Turn();
 
-		rBody.velocity = transform.TransformDirection(velocity);
+		_rBody.velocity = transform.TransformDirection(_velocity);
 	}
 
 	private void MoveForward()
 	{
 		// move
-		velocity.z = moveSettings.forwardVel * Time.deltaTime;
-		//velocity.z = moveSettings.forwardVel * depthInput * Time.deltaTime;
+		_velocity.z = moveSettings.forwardVel * Time.deltaTime;
 
-		velocity.y = moveSettings.verticalVel * verticalInput * Time.deltaTime;
+		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 		
-		velocity.x = moveSettings.horizontalVel * horizontalInput * Time.deltaTime;
+		_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
 	}
 
 	private void Turn()
 	{
-		if (Mathf.Abs(turnInput) > inputSettings.inputDelay)
+		if (_turnLeft)
 		{
-			targetRotation *= Quaternion.AngleAxis(moveSettings.rotateVel * turnInput * Time.deltaTime, Vector3.up);
-			transform.rotation = targetRotation;
+			_playerAngle.y -= 90f;
+			_turnLeft = false;
 		}
-
-		ManagePlayerRotation();
-		transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, playerRotation, 0), moveSettings.turnSpeed * Time.deltaTime);
-	}
-
-	private void ManagePlayerRotation()
-	{
-		if (thePieceRoadWhereIam.type == RoadGeneration.PieceType.SIMPLE)
+		else if (_turnRight)
 		{
-			indChildNextPiece = 0;
-			return;
+			_playerAngle.y += 90f;
+			_turnRight = false;
 		}
-
-		if (rotatedOnSpecialPiece)
-			return;
-
-		//rotatedOnSpecialPiece = true;
-
-		float turningPoint;
-
-		switch (thePieceRoadWhereIam.dir)
+		else if (_turnDown)
 		{
-			case Direction.FORWARD:
-				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
-				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].z / 2;
-				turningPoint -= RoadPositions.WIDTH_PIECE;
-				if (this.transform.position.z >= turningPoint)
-				{
-					rotatedOnSpecialPiece = true;
-				}
-				break;
-
-			case Direction.RIGHT:
-				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
-				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].x / 2;
-				turningPoint -= RoadPositions.WIDTH_PIECE;
-				if (this.transform.position.x >= turningPoint)
-				{
-					rotatedOnSpecialPiece = true;
-				}
-				break;
-
-			case Direction.BACKWARD:
-				turningPoint = thePieceRoadWhereIam.piece.transform.position.z;
-				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].z / 2;
-				turningPoint += RoadPositions.WIDTH_PIECE;
-				if (this.transform.position.z <= turningPoint)
-				{
-					rotatedOnSpecialPiece = true;
-				}
-				break;
-
-			case Direction.LEFT:
-				turningPoint = thePieceRoadWhereIam.piece.transform.position.x;
-				turningPoint += RoadPositions.forwardTranslate[(int)thePieceRoadWhereIam.plane][(int)thePieceRoadWhereIam.dir].x / 2;
-				turningPoint += RoadPositions.WIDTH_PIECE;
-				if (this.transform.position.x <= turningPoint)
-				{
-					rotatedOnSpecialPiece = true;
-				}
-				break;
+			_playerAngle.x += 90f;
+			_turnDown = false;
+		}
+		else if (_turnUp)
+		{
+			_playerAngle.x -= 90f;
+			_turnUp = false;
 		}
 
 
-		float angle = 0;
-
-		if (rotatedOnSpecialPiece)
-		{
-			switch (thePieceRoadWhereIam.type)
-			{
-				case RoadGeneration.PieceType.LEFT:
-					indChildNextPiece = 0;
-					angle = -90.0f;
-					break;
-
-				case RoadGeneration.PieceType.RIGHT:
-					indChildNextPiece = 0;
-					angle = 90.0f;
-					break;
-
-				case RoadGeneration.PieceType.LEFT_AND_RIGHT:
-					System.Random rnd = new System.Random();
-					indChildNextPiece = rnd.Next(2);
-					if (indChildNextPiece == 0)
-						angle = -90.0f;
-					else
-						angle = 90.0f;
-
-					break;
-			}
-		}
-
-		playerRotation += angle;
+		transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(_playerAngle), moveSettings.turnSpeed * Time.deltaTime);
 	}
 }
