@@ -69,6 +69,18 @@ public class RoadGeneration : MonoBehaviour
 			children = new List<PieceEntry>();
 			gridPos = Vector3.zero;
 		}
+
+		public bool IsCrossRoadType()
+		{
+			switch (type)
+			{
+				case PieceType.LEFT_AND_RIGHT:
+				case PieceType.UP_AND_DOWN:
+					return true;
+			}
+
+			return false;
+		}
 	}
 
 	public GeneticAlgoSettings genAlgoSettings = new GeneticAlgoSettings();
@@ -117,13 +129,10 @@ public class RoadGeneration : MonoBehaviour
 
 		_rnd = new System.Random();
 
-		DebugCreateInitialRoad();
-		
-		//DebugCreateInitialStraightRoad(20);
-		//DebugCreateInitialOneRightPieceRoad(4, 1);
-		//DebugCreateInitialOneLeftPieceRoad(4, 1);
+		//DebugCreateInitialRoad();
+		//DebugCreateInitialRoad2();
 
-		//AddPiecesToRoad();
+		AddPiecesToRoad();
 	}
 
 	// Use this for initialization
@@ -229,41 +238,41 @@ public class RoadGeneration : MonoBehaviour
 		// parent.plane == ZOX
 		switch (parent.dir)
 		{
-			case Direction.FORWARD:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = false;
-				break;
+		case Direction.FORWARD:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = false;
+			break;
 
-			case Direction.BACKWARD:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = true;
-				break;
+		case Direction.BACKWARD:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = true;
+			break;
 
-			case Direction.RIGHT:
-				plane = Assets.Scripts.Plane.YOZ;
-				if (upsideDown)
-					dir = Direction.BACKWARD;
-				else
-					dir = Direction.FORWARD;
-				upsideDown = true;
-				break;
+		case Direction.RIGHT:
+			plane = Assets.Scripts.Plane.YOZ;
+			if (upsideDown)
+				dir = Direction.BACKWARD;
+			else
+				dir = Direction.FORWARD;
+			upsideDown = true;
+			break;
 
-			case Direction.LEFT:
-				plane = Assets.Scripts.Plane.YOZ;
-				if (upsideDown)
-					dir = Direction.BACKWARD;
-				else
-					dir = Direction.FORWARD;
-				upsideDown = false;
-				break;
+		case Direction.LEFT:
+			plane = Assets.Scripts.Plane.YOZ;
+			if (upsideDown)
+				dir = Direction.BACKWARD;
+			else
+				dir = Direction.FORWARD;
+			upsideDown = false;
+			break;
 		}
 	}
 
@@ -277,41 +286,41 @@ public class RoadGeneration : MonoBehaviour
 		// parent.plane == XOY
 		switch (parent.dir)
 		{
-			case Direction.FORWARD:
-				plane = Assets.Scripts.Plane.YOZ;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = true;
-				break;
+		case Direction.FORWARD:
+			plane = Assets.Scripts.Plane.YOZ;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = true;
+			break;
 
-			case Direction.BACKWARD:
-				plane = Assets.Scripts.Plane.YOZ;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = false;
-				break;
+		case Direction.BACKWARD:
+			plane = Assets.Scripts.Plane.YOZ;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = false;
+			break;
 
-			case Direction.RIGHT:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.FORWARD;
-				else
-					dir = Direction.BACKWARD;
-				upsideDown = false;
-				break;
+		case Direction.RIGHT:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.FORWARD;
+			else
+				dir = Direction.BACKWARD;
+			upsideDown = false;
+			break;
 
-			case Direction.LEFT:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.FORWARD;
-				else
-					dir = Direction.BACKWARD;
-				upsideDown = true;
-				break;
+		case Direction.LEFT:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.FORWARD;
+			else
+				dir = Direction.BACKWARD;
+			upsideDown = true;
+			break;
 		}
 	}
 
@@ -325,41 +334,41 @@ public class RoadGeneration : MonoBehaviour
 		// parent.plane == YOZ
 		switch (parent.dir)
 		{
-			case Direction.FORWARD:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.LEFT;
-				else
-					dir = Direction.RIGHT;
-				upsideDown = true;
-				break;
+		case Direction.FORWARD:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.LEFT;
+			else
+				dir = Direction.RIGHT;
+			upsideDown = true;
+			break;
 
-			case Direction.BACKWARD:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.LEFT;
-				else
-					dir = Direction.RIGHT;
-				upsideDown = false;
-				break;
+		case Direction.BACKWARD:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.LEFT;
+			else
+				dir = Direction.RIGHT;
+			upsideDown = false;
+			break;
 
-			case Direction.RIGHT:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.BACKWARD;
-				else
-					dir = Direction.FORWARD;
-				upsideDown = false;
-				break;
+		case Direction.RIGHT:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.BACKWARD;
+			else
+				dir = Direction.FORWARD;
+			upsideDown = false;
+			break;
 
-			case Direction.LEFT:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.BACKWARD;
-				else
-					dir = Direction.FORWARD;
-				upsideDown = true;
-				break;
+		case Direction.LEFT:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.BACKWARD;
+			else
+				dir = Direction.FORWARD;
+			upsideDown = true;
+			break;
 		}
 	}
 
@@ -469,41 +478,41 @@ public class RoadGeneration : MonoBehaviour
 		// parent.plane == YOZ
 		switch (parent.dir)
 		{
-			case Direction.FORWARD:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = false;
-				break;
+		case Direction.FORWARD:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = false;
+			break;
 
-			case Direction.BACKWARD:
-				plane = Assets.Scripts.Plane.ZOX;
-				if (upsideDown)
-					dir = Direction.RIGHT;
-				else
-					dir = Direction.LEFT;
-				upsideDown = true;
-				break;
+		case Direction.BACKWARD:
+			plane = Assets.Scripts.Plane.ZOX;
+			if (upsideDown)
+				dir = Direction.RIGHT;
+			else
+				dir = Direction.LEFT;
+			upsideDown = true;
+			break;
 
-			case Direction.RIGHT:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.FORWARD;
-				else
-					dir = Direction.BACKWARD;
-				upsideDown = true;
-				break;
+		case Direction.RIGHT:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.FORWARD;
+			else
+				dir = Direction.BACKWARD;
+			upsideDown = true;
+			break;
 
-			case Direction.LEFT:
-				plane = Assets.Scripts.Plane.XOY;
-				if (upsideDown)
-					dir = Direction.FORWARD;
-				else
-					dir = Direction.BACKWARD;
-				upsideDown = false;
-				break;
+		case Direction.LEFT:
+			plane = Assets.Scripts.Plane.XOY;
+			if (upsideDown)
+				dir = Direction.FORWARD;
+			else
+				dir = Direction.BACKWARD;
+			upsideDown = false;
+			break;
 		}
 	}
 
@@ -849,6 +858,41 @@ public class RoadGeneration : MonoBehaviour
 		}
 	}
 
+	private void DebugCreateInitialRoad2()
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			AddPieceToRoad(PieceType.SIMPLE);
+		}
+
+		AddPieceToRoad(PieceType.UP);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.LEFT_AND_RIGHT);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+	}
+
+	private void AddPieceToRoad(PieceType type)
+	{
+		for (var i = _leafs.Count - 1; i >= 0; i--)
+		{
+			if (_leafs[i].IsCrossRoadType())
+			{
+				CreateAndAddPieceToRoad(_leafs[i], type);
+				CreateAndAddPieceToRoad(_leafs[i], type);
+
+				_leafs.Add(_leafs[i].children[1]);
+				_leafs[i] = _leafs[i].children[0];
+			}
+			else
+			{
+				_leafs[i] = CreateAndAddPieceToRoad(_leafs[i], type);
+			}
+		}
+	}
 
 
 	private List<PieceType> GetPossibleSpecialPieceTypes(PieceEntry parent)
@@ -947,24 +991,12 @@ public class RoadGeneration : MonoBehaviour
 		return true;
 	}
 
-	private bool IsCrossRoadType(PieceType type)
-	{
-		switch (type)
-		{
-			case PieceType.LEFT_AND_RIGHT:
-			case PieceType.UP_AND_DOWN:
-				return true;
-		}
-
-		return false;
-	}
-
 	private void AddSpecialPiece(int parentInd, bool firstCall = true)
 	{
 		var possiblePieceTypes = GetPossibleSpecialPieceTypes(_leafs[parentInd]);
 		if (possiblePieceTypes.Count > 0)
 		{
-			if (IsCrossRoadType(_leafs[parentInd].type))
+			if (_leafs[parentInd].IsCrossRoadType())
 			{
 				CreateAndAddPieceToRoad(_leafs[parentInd], possiblePieceTypes[_rnd.Next(possiblePieceTypes.Count)]);
 				CreateAndAddPieceToRoad(_leafs[parentInd], possiblePieceTypes[_rnd.Next(possiblePieceTypes.Count)]);
@@ -991,7 +1023,7 @@ public class RoadGeneration : MonoBehaviour
 	{
 		if (ItCanBeAddedToRoad(_leafs[parentInd], PieceType.SIMPLE))
 		{
-			if (IsCrossRoadType(_leafs[parentInd].type))
+			if (_leafs[parentInd].IsCrossRoadType())
 			{
 				CreateAndAddPieceToRoad(_leafs[parentInd], PieceType.SIMPLE);
 				CreateAndAddPieceToRoad(_leafs[parentInd], PieceType.SIMPLE);
