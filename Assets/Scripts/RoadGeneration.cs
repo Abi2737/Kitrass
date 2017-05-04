@@ -132,6 +132,9 @@ public class RoadGeneration : MonoBehaviour
 		//DebugCreateInitialRoad();
 		//DebugCreateInitialRoad2();
 
+		//DebugCreateInitialStraightRoad(30);
+		
+
 		AddPiecesToRoad();
 	}
 
@@ -850,11 +853,9 @@ public class RoadGeneration : MonoBehaviour
 
 	private void DebugCreateInitialStraightRoad(int numPieces)
 	{
-		PieceEntry parent = _root;
-
 		for ( int i = 0; i < numPieces; i++ )
 		{
-			parent = CreateAndAddPieceToRoad(parent, PieceType.SIMPLE);
+			AddPieceToRoad(PieceType.SIMPLE);
 		}
 	}
 
@@ -866,6 +867,9 @@ public class RoadGeneration : MonoBehaviour
 		}
 
 		AddPieceToRoad(PieceType.UP);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
 		AddPieceToRoad(PieceType.SIMPLE);
 		AddPieceToRoad(PieceType.SIMPLE);
 		AddPieceToRoad(PieceType.LEFT_AND_RIGHT);

@@ -141,6 +141,7 @@ public class GamePlayerController : MonoBehaviour
 		GetInput();
 
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
+		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
 	}
 
 	private void FixedUpdate()
