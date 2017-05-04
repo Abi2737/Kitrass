@@ -85,6 +85,7 @@
     <Compile Include="Assets\Scripts\PlayerSimpleAIController.cs" />
     <Compile Include="Assets\Scripts\RoadGeneration.cs" />
     <Compile Include="Assets\Scripts\RoadPositions.cs" />
+    <Compile Include="Assets\Scripts\ScoreManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

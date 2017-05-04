@@ -12,7 +12,6 @@ public class GamePlayerController : MonoBehaviour
 		public float forwardVel = 700;
 		public float verticalVel = 200;
 		public float horizontalVel = 200;
-
 		public float turnSpeed = 7;
 	}
 
@@ -23,6 +22,8 @@ public class GamePlayerController : MonoBehaviour
 		public string VERTICAL_AXIS = "PlayerVertical";
 		public string HORIZONTAL_AXIS = "PlayerHorizontal";
 	}
+
+	public float pointsPerSecond = 10;
 
 	enum Actions
 	{
@@ -63,6 +64,8 @@ public class GamePlayerController : MonoBehaviour
 
 	bool _dead;
 
+	ScoreManager _scoreManager;
+
 	private void Start()
 	{
 		_targetRotation = transform.rotation;
@@ -96,6 +99,8 @@ public class GamePlayerController : MonoBehaviour
 		_upsideDown = false;
 
 		_dead = false;
+
+		_scoreManager = GameObject.Find("ScoreManagerGameObject").GetComponent<ScoreManager>();
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -171,6 +176,8 @@ public class GamePlayerController : MonoBehaviour
 			DestroyImmediate(gameObject);
 
 		GetInput();
+
+		_scoreManager.AddToScore(pointsPerSecond * Time.deltaTime);
 
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
 		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
