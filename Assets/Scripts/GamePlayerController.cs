@@ -9,7 +9,9 @@ public class GamePlayerController : MonoBehaviour
 	[System.Serializable]
 	public class MoveSettings
 	{
-		public float forwardVel = 700;
+		public float forwardMinVel = 700;
+		public float forwardMaxVel = 1200;
+		public float increaseForwardVelPerSecond = 2;
 		public float verticalVel = 200;
 		public float horizontalVel = 200;
 		public float turnSpeed = 7;
@@ -66,6 +68,8 @@ public class GamePlayerController : MonoBehaviour
 
 	ScoreManager _scoreManager;
 
+	float _forwardSpeed;
+
 	private void Start()
 	{
 		_targetRotation = transform.rotation;
@@ -101,6 +105,8 @@ public class GamePlayerController : MonoBehaviour
 		_dead = false;
 
 		_scoreManager = GameObject.Find("ScoreManagerGameObject").GetComponent<ScoreManager>();
+
+		_forwardSpeed = moveSettings.forwardMinVel;
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -177,6 +183,11 @@ public class GamePlayerController : MonoBehaviour
 
 		GetInput();
 
+		if (_forwardSpeed < moveSettings.forwardMaxVel )
+			_forwardSpeed += moveSettings.increaseForwardVelPerSecond * Time.deltaTime;
+
+		Debug.Log(_forwardSpeed);
+
 		_scoreManager.AddToScore(pointsPerSecond * Time.deltaTime);
 
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
@@ -194,7 +205,7 @@ public class GamePlayerController : MonoBehaviour
 	private void MoveForward()
 	{
 		// move
-		_velocity.z = moveSettings.forwardVel * Time.deltaTime;
+		_velocity.z = _forwardSpeed * Time.deltaTime;
 
 		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 		
@@ -203,7 +214,6 @@ public class GamePlayerController : MonoBehaviour
 
 	public void Die()
 	{
-		Debug.Log("Death");
 		_dead = true;
 	}
 
