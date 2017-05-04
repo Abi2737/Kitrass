@@ -16,13 +16,13 @@ public class GameCameraSmoothController : MonoBehaviour
 
 	public PositionSettings _posSettings = new PositionSettings();
 
-	Transform _transform;
+	Transform _transform, _lastTransform;
 	Vector3 _velocity;
 	RaycastHit _hit;
 
 	private void Awake()
 	{
-		_transform = transform;
+		_transform = _lastTransform = transform;
 		_velocity = Vector3.one;
 	}
 
@@ -42,6 +42,13 @@ public class GameCameraSmoothController : MonoBehaviour
 			_transform.position = Vector3.SmoothDamp(_transform.position, toPos, ref _velocity, _posSettings.distanceDamp);
 
 			_transform.LookAt(target, target.up);
+
+			_lastTransform = _transform;
 		}
+		else
+		{
+			_lastTransform = _transform;
+		}
+
 	}
 }

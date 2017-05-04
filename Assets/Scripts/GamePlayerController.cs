@@ -43,8 +43,7 @@ public class GamePlayerController : MonoBehaviour
 	public MoveSettings moveSettings = new MoveSettings();
 	public InputSettings inputSettings = new InputSettings();
 
-	Vector3 _velocity = Vector3.zero;
-	Quaternion _targetRotation;
+	Vector3 _velocity;
 	Rigidbody _rBody;
 	float _verticalInput, _horizontalInput;
 
@@ -72,12 +71,12 @@ public class GamePlayerController : MonoBehaviour
 
 	private void Start()
 	{
-		_targetRotation = transform.rotation;
-
 		if (GetComponent<Rigidbody>())
 			_rBody = GetComponent<Rigidbody>();
 		else
 			Debug.LogError("No rigidbody!");
+
+		_velocity = Vector3.zero;
 
 		_verticalInput = _horizontalInput = 0;
 
@@ -126,7 +125,7 @@ public class GamePlayerController : MonoBehaviour
 			_canTurn = true;
 
 			// disable the parent that the player doesn't see that the piece was disable
-			_thePieceRoadWhereIam.parent.Disable();
+			_thePieceRoadWhereIam.parent.parent.Disable();
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
@@ -179,14 +178,17 @@ public class GamePlayerController : MonoBehaviour
 	private void Update()
 	{
 		if (_dead)
+		{
 			DestroyImmediate(gameObject);
+			return;
+		}
 
 		GetInput();
 
 		if (_forwardSpeed < moveSettings.forwardMaxVel )
 			_forwardSpeed += moveSettings.increaseForwardVelPerSecond * Time.deltaTime;
 
-		Debug.Log(_forwardSpeed);
+		//Debug.Log(_forwardSpeed);
 
 		_scoreManager.AddToScore(pointsPerSecond * Time.deltaTime);
 

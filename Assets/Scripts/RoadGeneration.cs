@@ -77,26 +77,6 @@ public class RoadGeneration : MonoBehaviour
 			return false;
 		}
 
-		public void Delete(bool deleteChildren = false)
-		{
-			if (!deleteChildren)
-			{
-				foreach (var child in children)
-				{
-					child.parent = null;
-				}
-			}
-			else
-			{
-				foreach (var child in children)
-				{
-					child.Delete(true);
-				}
-			}
-
-			Destroy(piece);
-		}
-
 		public void Disable(bool disableChildren = false)
 		{
 			if (disableChildren)
@@ -1121,6 +1101,27 @@ public class RoadGeneration : MonoBehaviour
 		_genAlgo.Evolve();
 	}
 
+	public void DeletePiece(PieceEntry pieceEntry, bool deleteChildren = false)
+	{ 
+		if (!deleteChildren)
+		{
+			foreach (var child in pieceEntry.children)
+			{
+				child.parent = null;
+			}
+		}
+		else
+		{
+			foreach (var child in pieceEntry.children)
+			{
+				DeletePiece(child, true);
+			}
+		}
+
+		_takenPos.Remove(pieceEntry.gridPos);
+		Destroy(pieceEntry.piece);
+	}
+
 	public void RemovePiecesFromRoad()
 	{
 		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
@@ -1133,10 +1134,10 @@ public class RoadGeneration : MonoBehaviour
 				if (child.playerWasHere)
 					aux = child;
 				else
-					child.Delete(true);
+					DeletePiece(child, true);
 			}
 
-			_root.Delete();
+			DeletePiece(_root);
 			_root = aux;
 		}
 	}
