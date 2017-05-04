@@ -9,12 +9,11 @@ public class GamePlayerController : MonoBehaviour
 	[System.Serializable]
 	public class MoveSettings
 	{
-		public float forwardVel = 500;
-		public float verticalVel = 100;
-		public float horizontalVel = 100;
-		public float rotateVel = 100;
+		public float forwardVel = 700;
+		public float verticalVel = 200;
+		public float horizontalVel = 200;
 
-		public float turnSpeed = 10;
+		public float turnSpeed = 2;
 	}
 
 	[System.Serializable]
@@ -55,9 +54,10 @@ public class GamePlayerController : MonoBehaviour
 	Assets.Scripts.Plane _plane;
 	bool _upsideDown;
 
-
+	RoadGeneration _roadGeneration;
 	RoadGeneration.PieceEntry _thePieceRoadWhereIam;
 	bool _pieceRoadChanged;
+	int _numPiecesChanged;
 
 	Vector3 _playerAngle;
 
@@ -76,7 +76,12 @@ public class GamePlayerController : MonoBehaviour
 
 		_playerAngle = Vector3.zero;
 
-		_thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetRoadRoot();
+		_roadGeneration = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>();
+
+		_thePieceRoadWhereIam = _roadGeneration.GetPlayerStartPiece();
+		_thePieceRoadWhereIam.playerWasHere = true;
+
+		_numPiecesChanged = 0;
 
 		_actionTaken = Actions.NONE;
 
@@ -109,6 +114,17 @@ public class GamePlayerController : MonoBehaviour
 			else
 			{
 				_thePieceRoadWhereIam = _thePieceRoadWhereIam.children[0];
+			}
+
+			_thePieceRoadWhereIam.playerWasHere = true;
+
+			_numPiecesChanged++;
+			if (_numPiecesChanged == _roadGeneration.genAlgoSettings.numChromosoms * _roadGeneration.genAlgoSettings.numPiecesOnChromosome)
+			{
+				_roadGeneration.AddPiecesToRoad();
+				_roadGeneration.RemovePiecesFromRoad();
+
+				_numPiecesChanged = 0;
 			}
 
 			_actionTaken = Actions.NONE;

@@ -58,7 +58,7 @@ public class PlayerSimpleAIController : MonoBehaviour {
 		_depthInput = 0;
 
 
-		_thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetRoadRoot();
+		_thePieceRoadWhereIam = GameObject.Find("RoadGenerationGameObject").GetComponent<RoadGeneration>().GetPlayerStartPiece();
 		_indChildNextPiece = 0;
 		_pieceRoadChanged = false;
 		_rotatedOnSpecialPiece = false;

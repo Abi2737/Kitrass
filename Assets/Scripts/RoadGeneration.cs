@@ -15,14 +15,6 @@ public class RoadGeneration : MonoBehaviour
 		public double mutationChangePercentage = 0.3;
 	}
 
-	[System.Serializable]
-	public class PlaneStart
-	{
-		public bool zoxPlane = true;
-		public bool xoyPlane = false;
-		public bool yozPlane = false;
-	}
-
 	public GameObject simplePiece;
 	public GameObject rightPiece;
 	public GameObject leftPiece;
@@ -58,6 +50,8 @@ public class RoadGeneration : MonoBehaviour
 		public List<PieceEntry> children;
 		public Vector3 gridPos;
 
+		public bool playerWasHere;
+
 		public PieceEntry()
 		{
 			piece = null;
@@ -68,6 +62,7 @@ public class RoadGeneration : MonoBehaviour
 			parent = null;
 			children = new List<PieceEntry>();
 			gridPos = Vector3.zero;
+			playerWasHere = false;
 		}
 
 		public bool IsCrossRoadType()
@@ -81,15 +76,35 @@ public class RoadGeneration : MonoBehaviour
 
 			return false;
 		}
+
+		public void Delete(bool deleteChildren = false)
+		{
+			if (!deleteChildren)
+			{
+				foreach (var child in children)
+				{
+					child.parent = null;
+				}
+			}
+			else
+			{
+				foreach (var child in children)
+				{
+					child.Delete(true);
+				}
+			}
+
+			Destroy(piece);
+		}
 	}
 
 	public GeneticAlgoSettings genAlgoSettings = new GeneticAlgoSettings();
 
-	public PlaneStart planeStart = new PlaneStart();
-
 	PieceEntry _root;
 	List<PieceEntry> _leafs;
 	HashSet<Vector3> _takenPos;
+
+	PieceEntry _playerStartPiece;
 
 	GeneticAlgorithm _genAlgo;
 
@@ -97,18 +112,23 @@ public class RoadGeneration : MonoBehaviour
 
 	private void Awake()
 	{
+		_rnd = new System.Random();
+
+		_genAlgo = new GeneticAlgorithm(
+			genAlgoSettings.numChromosoms,
+			genAlgoSettings.numPiecesOnChromosome,
+			genAlgoSettings.elitismPercentage,
+			genAlgoSettings.crossoverPercentage,
+			genAlgoSettings.mutationPercentage,
+			genAlgoSettings.mutationChangePercentage);
+
+
+
 		_root = new PieceEntry();
 		_root.piece = Instantiate(simplePiece);
 		_root.type = PieceType.SIMPLE;
 		_root.piece.transform.position = Vector3.zero;
 		_root.gridPos = Vector3.zero;
-
-		if (planeStart.zoxPlane)
-			_root.plane = Assets.Scripts.Plane.ZOX;
-		else if (planeStart.xoyPlane)
-			_root.plane = Assets.Scripts.Plane.XOY;
-		else
-			_root.plane = Assets.Scripts.Plane.YOZ;
 
 		_root.piece.transform.eulerAngles = RoadPositions.initialRotation[(int)_root.plane];
 
@@ -119,22 +139,29 @@ public class RoadGeneration : MonoBehaviour
 		_takenPos.Add(_root.gridPos);
 
 
-		_genAlgo = new GeneticAlgorithm(
-			genAlgoSettings.numChromosoms,
-			genAlgoSettings.numPiecesOnChromosome,
-			genAlgoSettings.elitismPercentage,
-			genAlgoSettings.crossoverPercentage,
-			genAlgoSettings.mutationPercentage,
-			genAlgoSettings.mutationChangePercentage);
+		
 
-		_rnd = new System.Random();
+		
 
 		//DebugCreateInitialRoad();
 		//DebugCreateInitialRoad2();
 
 		//DebugCreateInitialStraightRoad(30);
-		
 
+		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
+		Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
+
+		_root.piece.transform.position = pos;
+
+		for (int i = 0; i < numPieces; i++)
+		{
+			_leafs[_leafs.Count - 1].playerWasHere = true;
+			AddPieceToRoad(PieceType.SIMPLE);
+		}
+
+		_playerStartPiece = _leafs[_leafs.Count - 1];
+
+		AddPiecesToRoad();
 		AddPiecesToRoad();
 	}
 
@@ -152,12 +179,17 @@ public class RoadGeneration : MonoBehaviour
 			AddPiecesToRoad();
 		}
 
+		if (Input.GetKeyDown(KeyCode.H))
+		{
+			RemovePiecesFromRoad();
+		}
+
 		//DebugCreateRuntimeRoad();
 	}
 
-	public PieceEntry GetRoadRoot()
+	public PieceEntry GetPlayerStartPiece()
 	{
-		return _root;
+		return _playerStartPiece;
 	}
 
 	private void PrintRoad()
@@ -1050,7 +1082,7 @@ public class RoadGeneration : MonoBehaviour
 		}
 	}
 
-	private void AddPiecesToRoad()
+	public void AddPiecesToRoad()
 	{
 		var genes = _genAlgo.GetGenes();
 		
@@ -1070,5 +1102,25 @@ public class RoadGeneration : MonoBehaviour
 		}
 
 		_genAlgo.Evolve();
+	}
+
+	public void RemovePiecesFromRoad()
+	{
+		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
+		PieceEntry aux = _root;
+
+		for (int i = 0; i < numPieces; i++)
+		{
+			foreach(var child in _root.children)
+			{
+				if (child.playerWasHere)
+					aux = child;
+				else
+					child.Delete(true);
+			}
+
+			_root.Delete();
+			_root = aux;
+		}
 	}
 }
