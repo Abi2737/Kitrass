@@ -96,6 +96,23 @@ public class RoadGeneration : MonoBehaviour
 
 			Destroy(piece);
 		}
+
+		public void Disable(bool disableChildren = false)
+		{
+			if (disableChildren)
+			{
+				if (children.Count > 1)
+				{
+					foreach (var child in children)
+					{
+						if (!child.playerWasHere)
+							child.Disable(true);
+					}
+				}
+			}
+
+			piece.SetActive(false);
+		}
 	}
 
 	public GeneticAlgoSettings genAlgoSettings = new GeneticAlgoSettings();
@@ -156,6 +173,7 @@ public class RoadGeneration : MonoBehaviour
 		for (int i = 0; i < numPieces; i++)
 		{
 			_leafs[_leafs.Count - 1].playerWasHere = true;
+			_leafs[_leafs.Count - 1].Disable();
 			AddPieceToRoad(PieceType.SIMPLE);
 		}
 

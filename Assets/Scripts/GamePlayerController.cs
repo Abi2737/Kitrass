@@ -13,7 +13,7 @@ public class GamePlayerController : MonoBehaviour
 		public float verticalVel = 200;
 		public float horizontalVel = 200;
 
-		public float turnSpeed = 2;
+		public float turnSpeed = 7;
 	}
 
 	[System.Serializable]
@@ -103,6 +103,9 @@ public class GamePlayerController : MonoBehaviour
 			_pieceRoadChanged = true;
 
 			_canTurn = true;
+
+			// disable the parent that the player doesn't see that the piece was disable
+			_thePieceRoadWhereIam.parent.Disable(true);
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
