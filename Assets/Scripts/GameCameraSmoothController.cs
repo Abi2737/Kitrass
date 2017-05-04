@@ -28,17 +28,20 @@ public class GameCameraSmoothController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		Vector3 toPos = target.position + (target.rotation * _posSettings.targetPosOffset);
-		if (Physics.Linecast(_transform.position, toPos, out _hit))
+		if (target)
 		{
-			toPos = _posSettings.targetPosOffset;
-			toPos.y = -_posSettings.collisionOffsetPoint;
-			
-			toPos = target.position + (target.rotation * toPos);
+			Vector3 toPos = target.position + (target.rotation * _posSettings.targetPosOffset);
+			if (Physics.Linecast(_transform.position, toPos, out _hit))
+			{
+				toPos = _posSettings.targetPosOffset;
+				toPos.y = -_posSettings.collisionOffsetPoint;
+
+				toPos = target.position + (target.rotation * toPos);
+			}
+
+			_transform.position = Vector3.SmoothDamp(_transform.position, toPos, ref _velocity, _posSettings.distanceDamp);
+
+			_transform.LookAt(target, target.up);
 		}
-
-		_transform.position = Vector3.SmoothDamp(_transform.position, toPos, ref _velocity, _posSettings.distanceDamp);
-
-		_transform.LookAt(target, target.up);
 	}
 }

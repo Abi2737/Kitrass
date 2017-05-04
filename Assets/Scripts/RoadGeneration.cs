@@ -186,7 +186,6 @@ public class RoadGeneration : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		PrintRoad();
 	}
 
 	// Update is called once per frame

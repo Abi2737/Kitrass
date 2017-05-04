@@ -61,6 +61,8 @@ public class GamePlayerController : MonoBehaviour
 
 	Vector3 _playerAngle;
 
+	bool _dead;
+
 	private void Start()
 	{
 		_targetRotation = transform.rotation;
@@ -92,10 +94,18 @@ public class GamePlayerController : MonoBehaviour
 		_plane = Assets.Scripts.Plane.ZOX;
 
 		_upsideDown = false;
+
+		_dead = false;
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
+		if (other.tag == "Wall")
+		{
+			Die();
+			return;
+		}
+
 		//Debug.Log(this.name + " trigger: othName: " + other.name);
 
 		if (!_pieceRoadChanged)
@@ -105,7 +115,7 @@ public class GamePlayerController : MonoBehaviour
 			_canTurn = true;
 
 			// disable the parent that the player doesn't see that the piece was disable
-			_thePieceRoadWhereIam.parent.Disable(true);
+			_thePieceRoadWhereIam.parent.Disable();
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
@@ -157,6 +167,9 @@ public class GamePlayerController : MonoBehaviour
 
 	private void Update()
 	{
+		if (_dead)
+			DestroyImmediate(gameObject);
+
 		GetInput();
 
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
@@ -179,6 +192,12 @@ public class GamePlayerController : MonoBehaviour
 		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 		
 		_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
+	}
+
+	public void Die()
+	{
+		Debug.Log("Death");
+		_dead = true;
 	}
 
 	private void Turn()
