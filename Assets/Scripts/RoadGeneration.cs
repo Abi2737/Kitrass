@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Assets.Scripts;
 
 public class RoadGeneration : MonoBehaviour
@@ -171,6 +172,11 @@ public class RoadGeneration : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+		if (Input.GetKeyDown(KeyCode.R))
+		{
+			SceneManager.LoadScene(0);
+		}
+
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			AddPiecesToRoad();
