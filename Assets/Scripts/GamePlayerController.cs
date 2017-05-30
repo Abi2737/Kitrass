@@ -4,6 +4,20 @@ using UnityEngine;
 using Assets.Scripts;
 using System;
 
+
+public enum Actions
+{
+	NONE = 0,
+	MOVE_LEFT = 1,
+	MOVE_RIGHT = 2,
+	MOVE_UP = 3,
+	MOVE_DOWN = 4,
+	TURN_LEFT = 5,
+	TURN_RIGHT = 6,
+	TURN_UP = 7,
+	TURN_DOWN = 8
+}
+
 public class GamePlayerController : MonoBehaviour
 {
 	[System.Serializable]
@@ -26,19 +40,6 @@ public class GamePlayerController : MonoBehaviour
 	}
 
 	public float pointsPerSecond = 10;
-
-	enum Actions
-	{
-		NONE = 0,
-		MOVE_LEFT = 1,
-		MOVE_RIGHT = 2,
-		MOVE_UP = 3,
-		MOVE_DOWN = 4,
-		TURN_LEFT = 5,
-		TURN_RIGHT = 6,
-		TURN_UP = 7,
-		TURN_DOWN = 8
-	}
 
 	public MoveSettings moveSettings = new MoveSettings();
 	public InputSettings inputSettings = new InputSettings();
@@ -68,6 +69,8 @@ public class GamePlayerController : MonoBehaviour
 	ScoreManager _scoreManager;
 
 	float _forwardSpeed;
+
+	bool _commandReceived;
 
 	private void Start()
 	{
@@ -106,11 +109,12 @@ public class GamePlayerController : MonoBehaviour
 		_scoreManager = GameObject.Find("ScoreManagerGameObject").GetComponent<ScoreManager>();
 
 		_forwardSpeed = moveSettings.forwardMinVel;
+
+		_commandReceived = false;
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
-		Debug.Log(other.tag);
 		if (other.tag == "Wall")
 		{
 			Die();
@@ -162,10 +166,51 @@ public class GamePlayerController : MonoBehaviour
 		_pieceRoadChanged = false;
 	}
 
+	public void CommandAction(Actions action)
+	{
+		_commandReceived = true;
+
+		_verticalInput = 0;
+		if (action == Actions.MOVE_UP)
+			_verticalInput = 1;
+		else if (action == Actions.MOVE_DOWN)
+			_verticalInput = -1;
+
+		_horizontalInput = 0;
+		if (action == Actions.MOVE_RIGHT)
+			_horizontalInput = 1;
+		else if (action == Actions.MOVE_LEFT)
+			_horizontalInput = -1;
+
+		if (_canTurn)
+		{
+			_turnLeft = action == Actions.TURN_LEFT;
+			_turnRight = action == Actions.TURN_RIGHT;
+			_turnUp = action == Actions.TURN_UP;
+			_turnDown = action == Actions.TURN_DOWN;
+		}
+	}
+
 	private void GetInput()
 	{
-		_verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
-		_horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
+		if (_commandReceived)
+			return;
+
+		//_verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
+		//_horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
+
+		_verticalInput = 0;
+		if (Input.GetKey(KeyCode.W))
+			_verticalInput = 1;
+		else if (Input.GetKey(KeyCode.S))
+			_verticalInput = -1;
+
+
+		_horizontalInput = 0;
+		if (Input.GetKey(KeyCode.D))
+			_horizontalInput = 1;
+		else if (Input.GetKey(KeyCode.A))
+			_horizontalInput = -1;
 
 		if (_canTurn)
 		{
@@ -175,6 +220,7 @@ public class GamePlayerController : MonoBehaviour
 			_turnDown = Input.GetKeyDown(KeyCode.DownArrow);
 		}
 	}
+	
 
 	private void Update()
 	{
@@ -226,6 +272,8 @@ public class GamePlayerController : MonoBehaviour
 
 	private void Turn()
 	{
+		_commandReceived = false;
+
 		bool changed = false;
 		if (_turnLeft)
 		{
