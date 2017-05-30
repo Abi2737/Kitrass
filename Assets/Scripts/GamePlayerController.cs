@@ -199,9 +199,14 @@ public class GamePlayerController : MonoBehaviour
 	private void FixedUpdate()
 	{
 		MoveForward();
-		Turn();
+		//Turn();
 
 		_rBody.velocity = transform.TransformDirection(_velocity);
+	}
+
+	private void LateUpdate()
+	{
+		Turn();
 	}
 
 	private void MoveForward()

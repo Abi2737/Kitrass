@@ -51,10 +51,11 @@ public class EnemyController : MonoBehaviour
 		_velocity = Vector3.zero;
 
 		_transform = transform;
+		transform.Rotate(90, 0, 0);
 
 		_forwardSpeed = moveSettings.forwardMinVel;
 
-		_playerController = GameObject.Find("PlayerGameObject").GetComponent<GamePlayerController>();
+		_playerController = GameObject.Find("PlayerGameObject").GetComponentInChildren<GamePlayerController>();
 
 		_dead = false;
 	}
