@@ -110,6 +110,7 @@ public class GamePlayerController : MonoBehaviour
 
 	private void OnTriggerEnter(Collider other)
 	{
+		Debug.Log(other.tag);
 		if (other.tag == "Wall")
 		{
 			Die();
@@ -199,7 +200,6 @@ public class GamePlayerController : MonoBehaviour
 	private void FixedUpdate()
 	{
 		MoveForward();
-		//Turn();
 
 		_rBody.velocity = transform.TransformDirection(_velocity);
 	}
