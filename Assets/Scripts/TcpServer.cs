@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TcpServer : MonoBehaviour
 { 
@@ -16,12 +18,43 @@ public class TcpServer : MonoBehaviour
 
 	GamePlayerController _playerController;
 
-	// Use this for initialization
-	void Start ()
-	{
-		StartListening();
+	public Text infoText;
+	string _message;
 
-		_playerController = GameObject.Find("Player").GetComponent<GamePlayerController>();
+	bool _restartGame;
+	
+	void Awake()
+	{
+		DontDestroyOnLoad(this);
+
+		_playerController = null;
+		_message = null;
+		_restartGame = false;
+
+		StartListening();
+	}
+
+	void Update()
+	{
+		if (_playerController == null)
+		{
+			GameObject player = GameObject.Find("Player");
+			if (player != null)
+				_playerController = player.GetComponent<GamePlayerController>();
+		}
+
+		if (_message != null)
+		{
+			ShowMessage(_message);
+			_message = null;
+		}
+
+		if (_restartGame)
+		{
+			SceneManager.LoadScene(1);
+			_playerController = null;
+			_restartGame = false;
+		}
 	}
 
 	private void OnDestroy()
@@ -39,14 +72,13 @@ public class TcpServer : MonoBehaviour
 		_tcpListener = new TcpListener(ipaddr, nPort);
 
 		_tcpListener.Start(1);
+		
+		_message = "Server started... Waiting for client...";
 
-		Debug.Log("Server started...");
-		Debug.Log("Waiting for client...");
-
-		_tcpListener.BeginAcceptTcpClient(onCompleteAcceptTcpClient, _tcpListener);
+		_tcpListener.BeginAcceptTcpClient(OnCompleteAcceptTcpClient, _tcpListener);
 	}
 
-	void onCompleteAcceptTcpClient(IAsyncResult iar)
+	void OnCompleteAcceptTcpClient(IAsyncResult iar)
 	{
 		TcpListener tcpl = (TcpListener)iar.AsyncState;
 
@@ -54,20 +86,22 @@ public class TcpServer : MonoBehaviour
 		{
 			_tcpClient = tcpl.EndAcceptTcpClient(iar);
 
-			Debug.Log("Client Connected...");
+			
+			_message = "Client connected.";
+			
 
-			tcpl.BeginAcceptTcpClient(onCompleteAcceptTcpClient, tcpl);
+			tcpl.BeginAcceptTcpClient(OnCompleteAcceptTcpClient, tcpl);
 			
 			_rx = new byte[BUFFER_SIZE];
-			_tcpClient.GetStream().BeginRead(_rx, 0, _rx.Length, onCompleteReadFromTCPClientStream, _tcpClient);
+			_tcpClient.GetStream().BeginRead(_rx, 0, _rx.Length, OnCompleteReadFromTCPClientStream, _tcpClient);
 		}
-		catch (Exception exc)
+		catch (Exception ex)
 		{
-			Debug.Log(exc.Message);
+			_message = ex.Message;
 		}
 	}
 
-	void onCompleteReadFromTCPClientStream(IAsyncResult iar)
+	void OnCompleteReadFromTCPClientStream(IAsyncResult iar)
 	{
 		TcpClient tcpc;
 		int nCountReadBytes = 0;
@@ -80,21 +114,23 @@ public class TcpServer : MonoBehaviour
 
 			if (nCountReadBytes == 0)// this happens when the client is disconnected
 			{
-				Debug.Log("Client disconnected.");
+				_message = "Client disconnected.";
 				return;
 			}
 
 			char c = Convert.ToChar(_rx[0]);
-			Debug.Log("COMMAND: " + c);
+			if (c == 'r' || c == 'R')
+			{
+				_restartGame = true;
+			}
+			else
+				_playerController.CommandAction(ToActions(c));
 
-			_playerController.CommandAction(ToActions(c));
-
-
-			tcpc.GetStream().BeginRead(_rx, 0, _rx.Length, onCompleteReadFromTCPClientStream, tcpc);
+			tcpc.GetStream().BeginRead(_rx, 0, _rx.Length, OnCompleteReadFromTCPClientStream, tcpc);
 		}
 		catch (Exception ex)
 		{
-			Debug.Log(ex.Message);
+			_message = ex.Message;
 		}
 	}
 
@@ -136,5 +172,17 @@ public class TcpServer : MonoBehaviour
 		}
 
 		return Actions.NONE;
+	}
+
+	void ShowMessage(string message)
+	{
+		if (infoText != null)
+		{
+			infoText.text = message;
+		}
+		else
+		{
+			Debug.Log(message);
+		}
 	}
 }

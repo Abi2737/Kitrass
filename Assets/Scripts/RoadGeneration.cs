@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Assets.Scripts;
+using UnityEngine.SceneManagement;
 
 public class RoadGeneration : MonoBehaviour
 {
@@ -137,14 +137,47 @@ public class RoadGeneration : MonoBehaviour
 		_takenPos.Add(_root.gridPos);
 
 
-		
 
-		
+
+
 
 		//DebugCreateInitialRoad();
 		//DebugCreateInitialRoad2();
 
 		//DebugCreateInitialStraightRoad(30);
+
+		//_playerStartPiece = _root;
+
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.RIGHT);
+		////AddPieceToRoad(PieceType.SIMPLE);
+		////AddPieceToRoad(PieceType.UP);
+
+		//var change = PieceType.UP;
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+
 
 		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
 		Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
@@ -174,7 +207,7 @@ public class RoadGeneration : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.R))
 		{
-			SceneManager.LoadScene(0);
+			SceneManager.LoadScene(1);
 		}
 
 		if (Input.GetKeyDown(KeyCode.Space))
