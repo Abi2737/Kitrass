@@ -207,21 +207,24 @@ public class GamePlayerController : MonoBehaviour
 		//_verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
 		//_horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
 
-		//_verticalInput = 0;
-		//if (Input.GetKey(KeyCode.W))
-		//	_verticalInput = 1;
-		//else if (Input.GetKey(KeyCode.S))
-		//	_verticalInput = -1;
+		_verticalInput = 0;
+		if (Input.GetKey(KeyCode.W))
+			_verticalInput = 1;
+		else if (Input.GetKey(KeyCode.S))
+			_verticalInput = -1;
 
 
-		//_horizontalInput = 0;
-		//if (Input.GetKey(KeyCode.D))
-		//	_horizontalInput = 1;
-		//else if (Input.GetKey(KeyCode.A))
-		//	_horizontalInput = -1;
+		_horizontalInput = 0;
+		if (Input.GetKey(KeyCode.D))
+			_horizontalInput = 1;
+		else if (Input.GetKey(KeyCode.A))
+			_horizontalInput = -1;
 
-		_moveLeft = Input.GetKeyDown(KeyCode.A);
-		_moveRight = Input.GetKeyDown(KeyCode.D);
+		if (_canTurn)
+		{
+			_moveLeft = Input.GetKeyDown(KeyCode.A);
+			_moveRight = Input.GetKeyDown(KeyCode.D);
+		}
 
 		if (_canTurn)
 		{
@@ -253,7 +256,8 @@ public class GamePlayerController : MonoBehaviour
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
 		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
 
-		Debug.Log(_upsideDown + " " + _thePieceRoadWhereIam.dir + " " + _thePieceRoadWhereIam.plane);
+		Debug.Log(_upsideDown + " " + _thePieceRoadWhereIam.dir + " " + _thePieceRoadWhereIam.plane + " " + 
+			_thePieceRoadWhereIam.piece.transform.right);
 	}
 
 	private void FixedUpdate()
@@ -514,20 +518,58 @@ public class GamePlayerController : MonoBehaviour
 		transform.position = pos;
 	}
 
+
+	private void MoveLeft2()
+	{
+		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+		
+		Vector3 result = Vector3.Scale(piecePos, -transform.right);
+		result += -transform.right * RoadPositions.WIDTH_PIECE / 3;
+
+		Vector3 pos = transform.position;
+		if (result.x != 0)
+			pos.x = result.x;
+		else if (result.y != 0)
+			pos.y = result.y;
+		else
+			pos.z = result.z;
+
+		transform.position = pos;
+	}
+
+	private void MoveRight2()
+	{
+		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+
+		Vector3 result = Vector3.Scale(piecePos, transform.right);
+		result += transform.right * RoadPositions.WIDTH_PIECE / 3;
+
+		Vector3 pos = transform.position;
+		if (result.x != 0)
+			pos.x = result.x;
+		else if (result.y != 0)
+			pos.y = result.y;
+		else
+			pos.z = result.z;
+
+		transform.position = pos;
+	}
+
 	private void LateUpdate()
 	{
 		Turn();
 
-		if (_moveLeft)
-		{
-			//MoveLeftOrRight(true);
-			MoveLeft();
-		}
-		else if (_moveRight)
-		{
-			//MoveLeftOrRight(false);
-			MoveRight();
-		}
+
+		//if (_moveLeft)
+		//{
+		//	//MoveLeftOrRight(true);
+		//	MoveLeft2();
+		//}
+		//else if (_moveRight)
+		//{
+		//	//MoveLeftOrRight(false);
+		//	MoveRight2();
+		//}
 
 	}
 
@@ -538,7 +580,7 @@ public class GamePlayerController : MonoBehaviour
 
 		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 		
-		//_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
+		_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
 	}
 
 	public void Die()
