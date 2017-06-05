@@ -67,7 +67,8 @@ public class GamePlayerController : MonoBehaviour
 	bool _pieceRoadChanged;
 	int _numPiecesChanged;
 
-	Vector3 _playerAngle;
+	Vector3 _playerAngle, _playerDesiredPositionMask;
+	float _playerDesiredPosition;
 
 	bool _dead;
 
@@ -99,6 +100,9 @@ public class GamePlayerController : MonoBehaviour
 
 		_thePieceRoadWhereIam = _roadGeneration.GetPlayerStartPiece();
 		_thePieceRoadWhereIam.playerWasHere = true;
+
+		_playerDesiredPositionMask = Vector3.zero;
+		_playerDesiredPosition = 0.0f;
 
 		_numPiecesChanged = 0;
 
@@ -138,7 +142,7 @@ public class GamePlayerController : MonoBehaviour
 			_canTurn = true;
 
 			// disable the parent that the player doesn't see that the piece was disable
-			_thePieceRoadWhereIam.parent.parent.Disable();
+			//_thePieceRoadWhereIam.parent.parent.Disable();
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
@@ -264,18 +268,20 @@ public class GamePlayerController : MonoBehaviour
 		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
 
 		//if (_thePieceRoadWhereIam.plane == Assets.Scripts.Plane.YOZ)
-			Debug.Log(_upsideDown + " " + _thePieceRoadWhereIam.dir + " " + _thePieceRoadWhereIam.plane + " " + 
-				_upsideDown + " " + _dir + " " + _plane);
+		//Debug.Log(_upsideDown + " " + _dir + " " + _plane);
 		//else
 		//	Debug.Log(_thePieceRoadWhereIam.plane);
 
 		//Debug.Log( _upsideDown + " " + _thePieceRoadWhereIam.upsideDown + " " + _plane + " " + _thePieceRoadWhereIam.plane);
+
+		//Debug.Log(transform.position.x + " " + _thePieceRoadWhereIam.piece.transform.position.x);
 	}
 
 	private void FixedUpdate()
 	{
 		MoveForward();
-		
+		Move();
+
 		_rBody.velocity = transform.TransformDirection(_velocity);
 	}
 
@@ -292,8 +298,6 @@ public class GamePlayerController : MonoBehaviour
 	private void LateUpdate()
 	{
 		Turn();
-
-		Move();
 	}
 
 	private void Move()
@@ -314,16 +318,236 @@ public class GamePlayerController : MonoBehaviour
 		{
 			MoveDown();
 		}
+
+		Vector3 pos = transform.position;
+		if (_playerDesiredPositionMask.x != 0)
+		{
+			pos.x = _playerDesiredPosition;
+			if (Math.Abs(transform.position.x - pos.x) <= 0.01f)
+				transform.position = pos;
+		}
+		else if (_playerDesiredPositionMask.y != 0)
+		{
+			pos.y = _playerDesiredPosition;
+			if (Math.Abs(transform.position.y - pos.y) <= 0.01f)
+				transform.position = pos;
+		}
+		else if (_playerDesiredPositionMask.z != 0)
+		{
+			pos.z = _playerDesiredPosition;
+			if (Math.Abs(transform.position.z - pos.z) <= 0.01f)
+				transform.position = pos;
+		}
+
+
+		if (transform.position != pos && _canTurn)
+			transform.position = Vector3.Lerp(transform.position, pos, 5 * Time.deltaTime);
+		else
+			_playerDesiredPositionMask = Vector3.zero;
 	}
 
 	private void MoveLeft()
 	{
-		MoveLeftOrRight(true);
+		int sign = 1;
+		if (_upsideDown)
+			sign = -1;
+
+		Vector3 pos = transform.position;
+		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+
+		_playerDesiredPositionMask = Vector3.zero;
+
+		switch (_dir)
+		{
+			case Direction.FORWARD:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.x, 2) > Math.Round(piecePos.x, 2))
+							pos.x = piecePos.x;
+						else
+							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(1, 0, 0);
+						_playerDesiredPosition = pos.x;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.RIGHT:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.z, 2) < Math.Round(piecePos.z, 2))
+							pos.z = piecePos.z;
+						else
+							pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(0, 0, 1);
+						_playerDesiredPosition = pos.z;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.BACKWARD:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.x, 2) < Math.Round(piecePos.x, 2))
+							pos.x = piecePos.x;
+						else
+							pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(1, 0, 0);
+						_playerDesiredPosition = pos.x;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.LEFT:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.z, 2) > Math.Round(piecePos.z, 2))
+							pos.z = piecePos.z;
+						else
+							pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(0, 0, 1);
+						_playerDesiredPosition = pos.z;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+		}
+
+		//_playerDesiredPosition = pos;
+		//transform.position = pos;
 	}
 
 	private void MoveRight()
 	{
-		MoveLeftOrRight(false);
+		int sign = 1;
+		if (_upsideDown)
+			sign = -1;
+
+		Vector3 pos = transform.position;
+		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+
+		_playerDesiredPositionMask = Vector3.zero;
+
+		switch (_dir)
+		{
+			case Direction.FORWARD:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.x, 2) < Math.Round(piecePos.x, 2))
+							pos.x = piecePos.x;
+						else
+							pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(1, 0, 0);
+						_playerDesiredPosition = pos.x;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.RIGHT:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.z, 2) > Math.Round(piecePos.z, 2))
+							pos.z = piecePos.z;
+						else
+							pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(0, 0, 1);
+						_playerDesiredPosition = pos.z;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.BACKWARD:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.x, 2) > Math.Round(piecePos.x, 2))
+							pos.x = piecePos.x;
+						else
+							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(1, 0, 0);
+						_playerDesiredPosition = pos.x;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+
+			case Direction.LEFT:
+				switch (_plane)
+				{
+					case Assets.Scripts.Plane.ZOX:
+						if (Math.Round(pos.z, 2) < Math.Round(piecePos.z, 2))
+							pos.z = piecePos.z;
+						else
+							pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
+
+						_playerDesiredPositionMask = new Vector3(0, 0, 1);
+						_playerDesiredPosition = pos.z;
+						break;
+					case Assets.Scripts.Plane.XOY:
+						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+					case Assets.Scripts.Plane.YOZ:
+						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
+						break;
+				}
+				break;
+		}
+
+		//_playerDesiredPosition = pos;
+		//transform.position = pos;
 	}
 
 	private void MoveLeftOrRight(bool left)
@@ -337,6 +561,7 @@ public class GamePlayerController : MonoBehaviour
 
 		Vector3 pos = transform.position;
 		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+		float offset = 1;
 
 		switch (_dir)
 		{
@@ -344,7 +569,10 @@ public class GamePlayerController : MonoBehaviour
 				switch (_plane)
 				{
 					case Assets.Scripts.Plane.ZOX:
-						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+						if (Math.Abs(pos.x - piecePos.x) < offset)
+							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+						else
+							pos.x = piecePos.x;
 						break;
 					case Assets.Scripts.Plane.XOY:
 						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;

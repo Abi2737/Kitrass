@@ -146,55 +146,61 @@ public class RoadGeneration : MonoBehaviour
 
 		//DebugCreateInitialStraightRoad(30);
 
-		//_playerStartPiece = _root;
-
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.RIGHT);
-		////AddPieceToRoad(PieceType.SIMPLE);
-		////AddPieceToRoad(PieceType.UP);
-
-		//var change = PieceType.UP;
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(change);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(change);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(change);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(change);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
-		//AddPieceToRoad(PieceType.SIMPLE);
+		_playerStartPiece = _root;
 
 
-		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
-		Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
+		var change = PieceType.RIGHT;
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(change);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(change);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(change);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(change);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
+		AddPieceToRoad(PieceType.SIMPLE);
 
-		_root.piece.transform.position = pos;
 
-		for (int i = 0; i < numPieces; i++)
-		{
-			_leafs[_leafs.Count - 1].playerWasHere = true;
-			_leafs[_leafs.Count - 1].Disable();
-			AddPieceToRoad(PieceType.SIMPLE);
-		}
+		//int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
+		//Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
 
-		_playerStartPiece = _leafs[_leafs.Count - 1];
+		//_root.piece.transform.position = pos;
 
-		AddPiecesToRoad();
-		AddPiecesToRoad();
+		//for (int i = 0; i < numPieces; i++)
+		//{
+		//	_leafs[_leafs.Count - 1].playerWasHere = true;
+		//	_leafs[_leafs.Count - 1].Disable();
+		//	AddPieceToRoad(PieceType.SIMPLE);
+		//}
+
+		//_playerStartPiece = _leafs[_leafs.Count - 1];
+
+		//AddPiecesToRoad();
+		//AddPiecesToRoad();
 	}
 
 	// Use this for initialization
