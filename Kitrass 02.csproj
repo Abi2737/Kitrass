@@ -94,15 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\BtnStart.cs" />
-    <Compile Include="Assets\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\CameraControllerWithoutCollision.cs" />
-    <Compile Include="Assets\Scripts\EnemyController.cs" />
-    <Compile Include="Assets\Scripts\GameCameraController.cs" />
     <Compile Include="Assets\Scripts\GameCameraSmoothController.cs" />
     <Compile Include="Assets\Scripts\GamePlayerController.cs" />
     <Compile Include="Assets\Scripts\GeneticAlgorithm.cs" />
-    <Compile Include="Assets\Scripts\PlayerController.cs" />
-    <Compile Include="Assets\Scripts\PlayerSimpleAIController.cs" />
     <Compile Include="Assets\Scripts\RoadGeneration.cs" />
     <Compile Include="Assets\Scripts\RoadPositions.cs" />
     <Compile Include="Assets\Scripts\ScoreManager.cs" />
