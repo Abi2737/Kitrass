@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\BtnStart.cs" />
+    <Compile Include="Assets\Scripts\EnemyController.cs" />
     <Compile Include="Assets\Scripts\GameCameraSmoothController.cs" />
     <Compile Include="Assets\Scripts\GamePlayerController.cs" />
     <Compile Include="Assets\Scripts\GeneticAlgorithm.cs" />

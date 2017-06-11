@@ -146,61 +146,61 @@ public class RoadGeneration : MonoBehaviour
 
 		//DebugCreateInitialStraightRoad(30);
 
-		_playerStartPiece = _root;
+		//_playerStartPiece = _root;
 
 
-		var change = PieceType.RIGHT;
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(change);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(change);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(change);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(change);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
-		AddPieceToRoad(PieceType.SIMPLE);
+		//var change = PieceType.RIGHT;
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(change);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
+		//AddPieceToRoad(PieceType.SIMPLE);
 
 
-		//int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
-		//Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
+		int numPieces = genAlgoSettings.numChromosoms * genAlgoSettings.numPiecesOnChromosome;
+		Vector3 pos = Vector3.back * numPieces * RoadPositions.LENGTH_PIECE;
 
-		//_root.piece.transform.position = pos;
+		_root.piece.transform.position = pos;
 
-		//for (int i = 0; i < numPieces; i++)
-		//{
-		//	_leafs[_leafs.Count - 1].playerWasHere = true;
-		//	_leafs[_leafs.Count - 1].Disable();
-		//	AddPieceToRoad(PieceType.SIMPLE);
-		//}
+		for (int i = 0; i < numPieces; i++)
+		{
+			_leafs[_leafs.Count - 1].playerWasHere = true;
+			_leafs[_leafs.Count - 1].Disable();
+			AddPieceToRoad(PieceType.SIMPLE);
+		}
 
-		//_playerStartPiece = _leafs[_leafs.Count - 1];
+		_playerStartPiece = _leafs[_leafs.Count - 1];
 
-		//AddPiecesToRoad();
-		//AddPiecesToRoad();
+		AddPiecesToRoad();
+		AddPiecesToRoad();
 	}
 
 	// Use this for initialization

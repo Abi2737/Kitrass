@@ -77,6 +77,10 @@ public class GamePlayerController : MonoBehaviour
 	float _forwardSpeed;
 
 	bool _commandReceived;
+	Actions _lastActionReceived;
+	TcpServer _tcpServer;
+	bool _turnCommand;
+	bool _rewardSend;
 
 	private void Start()
 	{
@@ -123,6 +127,13 @@ public class GamePlayerController : MonoBehaviour
 		_forwardSpeed = moveSettings.forwardMinVel;
 
 		_commandReceived = false;
+		_lastActionReceived = Actions.NONE;
+
+		GameObject tcpGameObject = GameObject.Find("TCPServerGameObject");
+		if (tcpGameObject != null)
+			_tcpServer = tcpGameObject.GetComponent<TcpServer>();
+
+		_turnCommand = false;
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -142,7 +153,7 @@ public class GamePlayerController : MonoBehaviour
 			_canTurn = true;
 
 			// disable the parent that the player doesn't see that the piece was disable
-			//_thePieceRoadWhereIam.parent.parent.Disable();
+			_thePieceRoadWhereIam.parent.parent.Disable();
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
@@ -176,6 +187,7 @@ public class GamePlayerController : MonoBehaviour
 	public void Die()
 	{
 		_dead = true;
+		Debug.Log("DEAD: " + _pieceRoadChanged);
 	}
 
 	private void OnTriggerExit(Collider other)
@@ -183,9 +195,17 @@ public class GamePlayerController : MonoBehaviour
 		_pieceRoadChanged = false;
 	}
 
+	int ll = 0;
+	private void OnCollisionStay(Collision collision)
+	{
+		Debug.Log("Coll" + ll);
+		ll++;
+	}
+
 	public void CommandAction(Actions action)
 	{
 		_commandReceived = true;
+		_lastActionReceived = action;
 
 		_verticalInput = 0;
 		if (action == Actions.MOVE_UP)
@@ -205,6 +225,7 @@ public class GamePlayerController : MonoBehaviour
 			_turnRight = action == Actions.TURN_RIGHT;
 			_turnUp = action == Actions.TURN_UP;
 			_turnDown = action == Actions.TURN_DOWN;
+			_turnCommand = true;
 		}
 	}
 	
@@ -213,28 +234,36 @@ public class GamePlayerController : MonoBehaviour
 		if (_commandReceived)
 			return;
 
-		//_verticalInput = Input.GetAxis(inputSettings.VERTICAL_AXIS);
-		//_horizontalInput = Input.GetAxis(inputSettings.HORIZONTAL_AXIS);
-
-		//_verticalInput = 0;
-		//if (Input.GetKey(KeyCode.W))
-		//	_verticalInput = 1;
-		//else if (Input.GetKey(KeyCode.S))
-		//	_verticalInput = -1;
-
-
-		//_horizontalInput = 0;
-		//if (Input.GetKey(KeyCode.D))
-		//	_horizontalInput = 1;
-		//else if (Input.GetKey(KeyCode.A))
-		//	_horizontalInput = -1;
-
-		if (_canTurn)
+		if (_lastActionReceived == Actions.MOVE_DOWN || _lastActionReceived == Actions.MOVE_UP || 
+			_lastActionReceived == Actions.MOVE_LEFT || _lastActionReceived == Actions.MOVE_RIGHT)
 		{
-			_moveLeft = Input.GetKeyDown(KeyCode.A);
-			_moveRight = Input.GetKeyDown(KeyCode.D);
-			_moveUp = Input.GetKeyDown(KeyCode.W);
-			_moveDown = Input.GetKeyDown(KeyCode.S);
+			_verticalInput = 0;
+			if (_lastActionReceived == Actions.MOVE_UP)
+				_verticalInput = 1;
+			else if (_lastActionReceived == Actions.MOVE_DOWN)
+				_verticalInput = -1;
+
+			_horizontalInput = 0;
+			if (_lastActionReceived == Actions.MOVE_RIGHT)
+				_horizontalInput = 1;
+			else if (_lastActionReceived == Actions.MOVE_LEFT)
+				_horizontalInput = -1;
+		}
+
+		if (!_tcpServer.ClientConnected())
+		{
+			_verticalInput = 0;
+			if (Input.GetKey(KeyCode.W))
+				_verticalInput = 1;
+			else if (Input.GetKey(KeyCode.S))
+				_verticalInput = -1;
+
+
+			_horizontalInput = 0;
+			if (Input.GetKey(KeyCode.D))
+				_horizontalInput = 1;
+			else if (Input.GetKey(KeyCode.A))
+				_horizontalInput = -1;
 		}
 
 		if (_canTurn)
@@ -280,7 +309,7 @@ public class GamePlayerController : MonoBehaviour
 	private void FixedUpdate()
 	{
 		MoveForward();
-		Move();
+		//Move();
 
 		_rBody.velocity = transform.TransformDirection(_velocity);
 	}
@@ -292,7 +321,7 @@ public class GamePlayerController : MonoBehaviour
 
 		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 
-		//_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
+		_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
 	}
 
 	private void LateUpdate()

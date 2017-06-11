@@ -22,6 +22,7 @@ public class TcpServer : MonoBehaviour
 	string _message;
 
 	bool _restartGame;
+	bool _clientConnected;
 	
 	void Awake()
 	{
@@ -30,6 +31,7 @@ public class TcpServer : MonoBehaviour
 		_playerController = null;
 		_message = null;
 		_restartGame = false;
+		_clientConnected = false;
 
 		StartListening();
 	}
@@ -54,6 +56,7 @@ public class TcpServer : MonoBehaviour
 			SceneManager.LoadScene(1);
 			_playerController = null;
 			_restartGame = false;
+			_clientConnected = false;
 		}
 	}
 
@@ -88,7 +91,8 @@ public class TcpServer : MonoBehaviour
 
 			
 			_message = "Client connected.";
-			
+			_clientConnected = true;
+
 
 			tcpl.BeginAcceptTcpClient(OnCompleteAcceptTcpClient, tcpl);
 			
@@ -184,5 +188,46 @@ public class TcpServer : MonoBehaviour
 		{
 			Debug.Log(message);
 		}
+	}
+
+
+	public void Send(string payload)
+	{
+		try
+		{
+			if (_tcpClient != null)
+			{
+				byte[] tx = Encoding.ASCII.GetBytes(payload);
+
+				if (_tcpClient.Client.Connected)
+				{
+					_tcpClient.GetStream().BeginWrite(tx, 0, tx.Length, OnCompleteWriteToServer, _tcpClient);
+				}
+			}
+		}
+		catch (Exception exc)
+		{
+			ShowMessage("Send: " + exc.Message);
+		}
+	}
+
+	void OnCompleteWriteToServer(IAsyncResult iar)
+	{
+		TcpClient tcpc;
+
+		try
+		{
+			tcpc = (TcpClient)iar.AsyncState;
+			tcpc.GetStream().EndWrite(iar);
+		}
+		catch (Exception exc)
+		{
+			ShowMessage("onCompleteWriteToServer: " + exc.Message);
+		}
+	}
+
+	public bool ClientConnected()
+	{
+		return _clientConnected;
 	}
 }

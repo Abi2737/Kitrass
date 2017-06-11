@@ -7,6 +7,19 @@ public class BtnStart : MonoBehaviour
 {
 	public void OnButtonStartClick()
 	{
+		StarGame();
+	}
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Return))
+		{
+			StarGame();
+		}
+	}
+
+	private void StarGame()
+	{
 		SceneManager.LoadScene(1);
 	}
 }
