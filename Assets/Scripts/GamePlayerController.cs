@@ -4,7 +4,7 @@ using UnityEngine;
 using Assets.Scripts;
 using UnityEngine.SceneManagement;
 using System;
-
+using UnityEngine.UI;
 
 public enum Actions
 {
@@ -80,7 +80,20 @@ public class GamePlayerController : MonoBehaviour
 	Actions _lastActionReceived;
 	TcpServer _tcpServer;
 	bool _turnCommand;
-	bool _rewardSend;
+	float _reward;
+
+	bool _isInCollision, _startTimer;
+	float _timeCount;
+
+	const float WAIT_TILL_SEND_TIME = 0.1f;
+
+	const float DEAD_REWARD = -100;
+	const float MOVE_REWARD = 0.1f;
+	const float TURN_REWARD = 2.0f;
+	const float MOVE_COLLISION_REWARD = 0.05f;
+
+
+	public Text cmdRecvText;
 
 	private void Start()
 	{
@@ -129,11 +142,21 @@ public class GamePlayerController : MonoBehaviour
 		_commandReceived = false;
 		_lastActionReceived = Actions.NONE;
 
-		GameObject tcpGameObject = GameObject.Find("TCPServerGameObject");
+		_tcpServer = null;
+		GameObject tcpGameObject = GameObject.Find("PersistentTCPServerGameObject");
 		if (tcpGameObject != null)
+		{
 			_tcpServer = tcpGameObject.GetComponent<TcpServer>();
+		}
 
 		_turnCommand = false;
+
+		_reward = MOVE_REWARD;
+
+		_isInCollision = false;
+
+		_timeCount = 0;
+		_startTimer = false;
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -141,6 +164,13 @@ public class GamePlayerController : MonoBehaviour
 		if (other.tag == "Wall")
 		{
 			Die();
+			return;
+		}
+
+		if (other.gameObject.tag == "PickUp")
+		{
+			_scoreManager.AddToScore(10);
+			other.gameObject.SetActive(false);
 			return;
 		}
 
@@ -154,9 +184,12 @@ public class GamePlayerController : MonoBehaviour
 
 			// disable the parent that the player doesn't see that the piece was disable
 			_thePieceRoadWhereIam.parent.parent.Disable();
+			_thePieceRoadWhereIam.parent.DisablePickups();
 
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
+				// UP AND DOWN ?!
+
 				if (_actionTaken == Actions.TURN_LEFT)
 					_thePieceRoadWhereIam = _thePieceRoadWhereIam.children[0];
 				else
@@ -184,26 +217,58 @@ public class GamePlayerController : MonoBehaviour
 		}
 	}
 
+	public RoadGeneration.PieceEntry PlayerPiece()
+	{
+		return _thePieceRoadWhereIam;
+	}
+
 	public void Die()
 	{
 		_dead = true;
-		Debug.Log("DEAD: " + _pieceRoadChanged);
+
+		_reward = DEAD_REWARD;
+		SendRewardToServer();
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
+		if (other.gameObject.tag == "PickUp")
+			return;
+
 		_pieceRoadChanged = false;
+
+		if (_turnCommand && !_dead && _thePieceRoadWhereIam.parent.type != RoadGeneration.PieceType.SIMPLE)
+		{
+			_turnCommand = false;
+			_reward = TURN_REWARD;
+			SendRewardToServer();
+		}
 	}
 
-	int ll = 0;
+
 	private void OnCollisionStay(Collision collision)
 	{
-		Debug.Log("Coll" + ll);
-		ll++;
+		_isInCollision = true;
+	}
+
+	private void OnCollisionExit(Collision collision)
+	{
+		_isInCollision = false;
+	}
+
+	private void SendRewardToServer()
+	{
+		int dead = _dead ? 1 : 0;
+		_tcpServer.Send(_reward + ":" + dead + "|");
 	}
 
 	public void CommandAction(Actions action)
 	{
+		if (cmdRecvText.color == Color.red)
+			cmdRecvText.color = Color.blue;
+		else
+			cmdRecvText.color = Color.red;
+
 		_commandReceived = true;
 		_lastActionReceived = action;
 
@@ -225,7 +290,19 @@ public class GamePlayerController : MonoBehaviour
 			_turnRight = action == Actions.TURN_RIGHT;
 			_turnUp = action == Actions.TURN_UP;
 			_turnDown = action == Actions.TURN_DOWN;
-			_turnCommand = true;
+
+			if (_turnLeft || _turnRight || _turnUp || _turnDown)
+			{
+				_turnCommand = true;
+				_startTimer = false;
+				_timeCount = 0;
+			}
+		}
+
+		if (!_turnCommand)
+		{
+			_startTimer = true;
+			_timeCount = 0.0f;
 		}
 	}
 	
@@ -250,7 +327,7 @@ public class GamePlayerController : MonoBehaviour
 				_horizontalInput = -1;
 		}
 
-		if (!_tcpServer.ClientConnected())
+		if (_tcpServer == null || !_tcpServer.ClientConnected())
 		{
 			_verticalInput = 0;
 			if (Input.GetKey(KeyCode.W))
@@ -265,6 +342,7 @@ public class GamePlayerController : MonoBehaviour
 			else if (Input.GetKey(KeyCode.A))
 				_horizontalInput = -1;
 		}
+		
 
 		if (_canTurn)
 		{
@@ -272,6 +350,11 @@ public class GamePlayerController : MonoBehaviour
 			_turnRight = Input.GetKeyDown(KeyCode.RightArrow);
 			_turnUp = Input.GetKeyDown(KeyCode.UpArrow);
 			_turnDown = Input.GetKeyDown(KeyCode.DownArrow);
+
+			if (_turnLeft || _turnRight || _turnUp || _turnDown )
+			{
+				_turnCommand = true;
+			}
 		}
 	}
 	
@@ -292,6 +375,21 @@ public class GamePlayerController : MonoBehaviour
 		//Debug.Log(_forwardSpeed);
 
 		_scoreManager.AddToScore(pointsPerSecond * Time.deltaTime);
+
+
+
+		if (_startTimer)
+			_timeCount += Time.deltaTime;
+
+		if (!_turnCommand && _timeCount >= WAIT_TILL_SEND_TIME)
+		{
+			_startTimer = false;
+			_timeCount = 0f;
+
+			_reward = _isInCollision ? MOVE_COLLISION_REWARD : MOVE_REWARD;
+			SendRewardToServer();
+		}
+
 
 		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
 		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);

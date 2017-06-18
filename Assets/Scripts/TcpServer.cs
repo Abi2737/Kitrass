@@ -56,7 +56,6 @@ public class TcpServer : MonoBehaviour
 			SceneManager.LoadScene(1);
 			_playerController = null;
 			_restartGame = false;
-			_clientConnected = false;
 		}
 	}
 
@@ -173,6 +172,10 @@ public class TcpServer : MonoBehaviour
 			case 'i':
 			case 'I':
 				return Actions.TURN_UP;
+
+			case 'n':
+			case 'N':
+				return Actions.NONE;
 		}
 
 		return Actions.NONE;

@@ -49,6 +49,13 @@ public class GameCameraSmoothController : MonoBehaviour
 		{
 			_lastTransform = _transform;
 		}
+	}
 
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.tag == "PickUp")
+		{
+			other.gameObject.SetActive(false);
+		}
 	}
 }

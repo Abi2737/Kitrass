@@ -24,6 +24,9 @@ public class RoadGeneration : MonoBehaviour
 	public GameObject downPiece;
 	public GameObject upAndDownPiece;
 
+	public GameObject pickUp;
+	public float pickUpPercentage = 0.4f;
+
 	public float crossroadPercentage = 0.1f;
 
 	public enum PieceType
@@ -53,6 +56,9 @@ public class RoadGeneration : MonoBehaviour
 
 		public bool playerWasHere;
 
+		public int pickUpsX, pickUpsY;
+		public List<GameObject> pickUps;
+
 		public PieceEntry()
 		{
 			piece = null;
@@ -64,6 +70,9 @@ public class RoadGeneration : MonoBehaviour
 			children = new List<PieceEntry>();
 			gridPos = Vector3.zero;
 			playerWasHere = false;
+
+			pickUpsX = pickUpsY = 0;
+			pickUps = new List<GameObject>();
 		}
 
 		public bool IsCrossRoadType()
@@ -92,7 +101,16 @@ public class RoadGeneration : MonoBehaviour
 				}
 			}
 
+			DisablePickups();
 			piece.SetActive(false);
+		}
+
+		public void DisablePickups()
+		{
+			foreach (var pickup in pickUps)
+			{
+				pickup.SetActive(false);
+			}
 		}
 	}
 
@@ -808,12 +826,140 @@ public class RoadGeneration : MonoBehaviour
 		newPiece.parent = parent;
 
 
+
+		AddPickups(newPiece);
+
+
+
 		// mark the grid pos as taken
 		_takenPos.Add(newPiece.gridPos);
 
 		return newPiece;
 	}
 
+
+	private void AddPickups(PieceEntry piece)
+	{
+		if (piece.type != PieceType.SIMPLE || _rnd.NextDouble() > pickUpPercentage)
+			return;
+
+		int px = piece.parent.pickUpsX;
+		int py = piece.parent.pickUpsY;
+
+		px += _rnd.Next(3) - 1;
+		py += _rnd.Next(3) - 1;
+
+		px = Mathf.Max(px, -1);
+		px = Mathf.Min(px, 1);
+
+		py = Mathf.Max(py, -1);
+		py = Mathf.Min(py, 1);
+
+		piece.pickUpsX = px;
+		piece.pickUpsY = py;
+
+		float lengthOffset = RoadPositions.LENGTH_PIECE / 3.0f;
+		float heightOffset = RoadPositions.HEIGHT_PIECE / 3.0f;
+		float widthOffset = RoadPositions.WIDTH_PIECE / 3.0f;
+
+		float pfx, pfy, pfz;
+
+		int sign = 1;
+		if (piece.dir == Direction.LEFT || piece.dir == Direction.BACKWARD)
+			sign = -1;
+
+		GameObject pickup;
+
+		switch (piece.plane)
+		{
+			case Assets.Scripts.Plane.ZOX:
+				if (piece.dir == Direction.FORWARD || piece.dir == Direction.BACKWARD)
+				{
+					pfx = piece.piece.transform.position.x + widthOffset * px;
+					pfy = piece.piece.transform.position.y + heightOffset * py;
+					pfz = piece.piece.transform.position.z - lengthOffset * sign;
+
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfz += lengthOffset * sign;
+					}
+				}
+				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				{
+					pfx = piece.piece.transform.position.x - lengthOffset * sign;
+					pfy = piece.piece.transform.position.y + heightOffset * py;
+					pfz = piece.piece.transform.position.z + widthOffset * px;
+
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfx += lengthOffset * sign;
+					}
+				}
+				break;
+
+			case Assets.Scripts.Plane.XOY:
+				if (piece.dir == Direction.FORWARD || piece.dir == Direction.BACKWARD)
+				{
+					pfx = piece.piece.transform.position.x - lengthOffset * sign;
+					pfy = piece.piece.transform.position.y + widthOffset * px;
+					pfz = piece.piece.transform.position.z + heightOffset * py;
+
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfx += lengthOffset * sign;
+					}
+				}
+				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				{
+					pfx = piece.piece.transform.position.x + widthOffset * px;
+					pfy = piece.piece.transform.position.y - lengthOffset * sign;
+					pfz = piece.piece.transform.position.z + heightOffset * py;
+
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfy += lengthOffset * sign;
+					}
+				}
+				break;
+
+			case Assets.Scripts.Plane.YOZ:
+				if (piece.dir == Direction.FORWARD || piece.dir == Direction.BACKWARD)
+				{
+					pfx = piece.piece.transform.position.x + heightOffset * py;
+					pfy = piece.piece.transform.position.y - lengthOffset * sign;
+					pfz = piece.piece.transform.position.z + widthOffset * px;
+					
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfy += lengthOffset * sign;
+					}
+				}
+				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				{
+					pfx = piece.piece.transform.position.x + lengthOffset * py;
+					pfy = piece.piece.transform.position.y + widthOffset * px;
+					pfz = piece.piece.transform.position.z - lengthOffset * sign;
+
+					for (int i = 0; i < 3; i++)
+					{
+						pickup = Instantiate(pickUp, new Vector3(pfx, pfy, pfz), new Quaternion());
+						piece.pickUps.Add(pickup);
+						pfz += lengthOffset * sign;
+					}
+				}
+				break;
+		}
+	}
 
 
 	private bool IsEmptyPos(PieceEntry parent)
@@ -1164,6 +1310,10 @@ public class RoadGeneration : MonoBehaviour
 		}
 
 		_takenPos.Remove(pieceEntry.gridPos);
+		foreach (var pickup in pieceEntry.pickUps)
+		{
+			Destroy(pickup);
+		}
 		Destroy(pieceEntry.piece);
 	}
 

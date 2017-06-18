@@ -85,7 +85,7 @@ public class GeneticAlgorithm
 		// schimbare de drum
 		int poz;
 
-		for (int i = 2; i < numChromosoms; i++)
+		for (int i = 0; i < numChromosoms; i++)
 		{
 			//for (int j = 0; j < numPiecesOnChromosome; j++)
 			//{
@@ -94,7 +94,7 @@ public class GeneticAlgorithm
 			//}
 
 			// o bucata va fi o schimbare de drum => generez pe ce pozitie va fii
-			poz = _rnd.Next(numGenesOnChromosome);
+			poz = _rnd.Next(numGenesOnChromosome-2)+1;
 			//m_newPopulation[i].typePieces[poz] = TypePieces.CHANGE;
 			_newPopulation[i].genes[poz] = true;
 			_newPopulation[i].fitness = 1;
