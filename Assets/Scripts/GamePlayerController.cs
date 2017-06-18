@@ -189,8 +189,7 @@ public class GamePlayerController : MonoBehaviour
 			if ( _thePieceRoadWhereIam.IsCrossRoadType() )
 			{
 				// UP AND DOWN ?!
-
-				if (_actionTaken == Actions.TURN_LEFT)
+				if (_actionTaken == Actions.TURN_LEFT || _actionTaken == Actions.TURN_UP)
 					_thePieceRoadWhereIam = _thePieceRoadWhereIam.children[0];
 				else
 					_thePieceRoadWhereIam = _thePieceRoadWhereIam.children[1];
@@ -225,6 +224,9 @@ public class GamePlayerController : MonoBehaviour
 	public void Die()
 	{
 		_dead = true;
+
+		Transform lights = transform.Find("LightsGameObject");
+		lights.parent = null;
 
 		_reward = DEAD_REWARD;
 		SendRewardToServer();
