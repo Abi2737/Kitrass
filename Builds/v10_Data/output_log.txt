@@ -1,0 +1,37 @@
+Initialize engine version: 5.6.1f1 (2860b30f0b54)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: Intel(R) HD Graphics Family (ID=0xa16)
+    Vendor:   Intel
+    VRAM:     1110 MB
+    Driver:   20.19.15.4531
+Begin MonoManager ReloadAssembly
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.144 seconds
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: E:\Abi\_Programming\Unity\Kitrass 02\Builds\v10_Data\Managed\System.dll (this message is harmless)
+desktop: 1366x768 60Hz; virtual: 3046x1050 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+desktop: 1680x1050 60Hz; virtual: 3046x1050 at 0,0
+<RI> Initialized touch support.
+UnloadTime: 1.797353 ms
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: b2c -> priority: 1 
+  Thread -> id: 2924 -> priority: 1 
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 20.271397 ms
+
+Unloading 7 unused Assets to reduce memory usage. Loaded Objects now: 8779.
+Total: 3.451619 ms (FindLiveObjects: 0.873017 ms CreateObjectMapping: 0.213122 ms MarkObjects: 2.329858 ms  DeleteObjects: 0.033206 ms)
+

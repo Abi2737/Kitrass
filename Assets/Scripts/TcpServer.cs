@@ -16,7 +16,7 @@ public class TcpServer : MonoBehaviour
 	const int BUFFER_SIZE = 1;
 	byte[] _rx;
 
-	GamePlayerController _playerController;
+	PlayerController _playerController;
 
 	public Text infoText;
 	string _message;
@@ -42,7 +42,7 @@ public class TcpServer : MonoBehaviour
 		{
 			GameObject player = GameObject.Find("Player");
 			if (player != null)
-				_playerController = player.GetComponent<GamePlayerController>();
+				_playerController = player.GetComponent<PlayerController>();
 		}
 
 		if (_message != null)

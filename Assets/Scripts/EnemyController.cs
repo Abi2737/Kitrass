@@ -37,7 +37,7 @@ public class EnemyController : MonoBehaviour
 
 	Transform _transform;
 
-	GamePlayerController _playerController;
+	PlayerController _playerController;
 
 	bool _dead;
 
@@ -55,7 +55,7 @@ public class EnemyController : MonoBehaviour
 
 		_forwardSpeed = moveSettings.forwardMinVel;
 
-		_playerController = GameObject.Find("Player").GetComponent<GamePlayerController>();
+		_playerController = GameObject.Find("Player").GetComponent<PlayerController>();
 
 		_dead = false;
 	}

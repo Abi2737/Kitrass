@@ -1273,20 +1273,23 @@ public class RoadGeneration : MonoBehaviour
 	public void AddPiecesToRoad()
 	{
 		var genes = _genAlgo.GetGenes();
-		
+
+		bool lastGene = false;
 		foreach (var gene in genes)
 		{
 			for (var i = _leafs.Count - 1; i >= 0; i--)
 			{
-				if (gene == true)       // it means a special piece will be added
+				if (gene == true && lastGene == false)       // it means a special piece will be added
 				{
 					AddSpecialPiece(i);
+					lastGene = true;
 				}
 				else
 				{
 					AddSimplePiece(i);
+					lastGene = false;
 				}
-			} 
+			}
 		}
 
 		_genAlgo.Evolve();
