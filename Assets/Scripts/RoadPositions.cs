@@ -23,9 +23,17 @@ namespace Assets.Scripts
 
 	public static class RoadPositions
 	{
-		public static float LENGTH_PIECE = 12;
-		public static float WIDTH_PIECE = 8;
-		public static float HEIGHT_PIECE = 4;
+		public const float LENGTH_PIECE = 12.0f;
+		public const float WIDTH_PIECE = 8.0f;
+		public const float HEIGHT_PIECE = 4.0f;
+
+		public const float LENGTH_PIECE_DIV_2 = LENGTH_PIECE / 2.0f;
+		public const float WIDTH_PIECE_DIV_2 = WIDTH_PIECE / 2.0f;
+		public const float HEIGHT_PIECE_DIV_2 = HEIGHT_PIECE / 2.0f;
+
+		public const float LENGTH_PIECE_DIV_3 = LENGTH_PIECE / 3.0f;
+		public const float WIDTH_PIECE_DIV_3 = WIDTH_PIECE / 3.0f;
+		public const float HEIGHT_PIECE_DIV_3 = HEIGHT_PIECE / 3.0f;
 
 		public static Vector3[] initialRotation =
 		{
@@ -129,28 +137,28 @@ namespace Assets.Scripts
 			// ZOX
 			new Vector3[]
 			{
-				new Vector3(WIDTH_PIECE/2 + LENGTH_PIECE/2, 0, LENGTH_PIECE/2 - WIDTH_PIECE/2),		// forward +z
-				new Vector3(LENGTH_PIECE/2 - WIDTH_PIECE/2, 0, -WIDTH_PIECE/2 - LENGTH_PIECE/2),	// right +x
-				new Vector3(-WIDTH_PIECE/2 - LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + WIDTH_PIECE/2),	// backward -z
-				new Vector3(-LENGTH_PIECE/2 + WIDTH_PIECE/2, 0, WIDTH_PIECE/2 + LENGTH_PIECE/2)		// left -x
+				new Vector3(WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2),		// forward +z
+				new Vector3(LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, 0, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// right +x
+				new Vector3(-WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2),	// backward -z
+				new Vector3(-LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, 0, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2)		// left -x
 			},
 
 			// XOY
 			new Vector3[]
 			{
-				new Vector3(LENGTH_PIECE/2 - WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2, 0),	// forward +x
-				new Vector3(-WIDTH_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2, 0),	// right -y
-				new Vector3(-LENGTH_PIECE/2 + WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2, 0),	// backward -x
-				new Vector3(WIDTH_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2, 0)		// left +y
+				new Vector3(LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0),	// forward +x
+				new Vector3(-WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, 0),	// right -y
+				new Vector3(-LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0),	// backward -x
+				new Vector3(WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, 0)		// left +y
 			},
 			
 			// YOZ
 			new Vector3[]
 			{
-				new Vector3(0, LENGTH_PIECE/2 - WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2),		// forward +y
-				new Vector3(0, -WIDTH_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2),	// right +z
-				new Vector3(0, -LENGTH_PIECE/2 + WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2),	// backward -y
-				new Vector3(0, WIDTH_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2)		// left -z
+				new Vector3(0, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),		// forward +y
+				new Vector3(0, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2),	// right +z
+				new Vector3(0, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// backward -y
+				new Vector3(0, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2)		// left -z
 			}
 		};
 
@@ -159,28 +167,28 @@ namespace Assets.Scripts
 			// ZOX
 			new Vector3[]
 			{
-				new Vector3(-WIDTH_PIECE/2 - LENGTH_PIECE/2, 0, LENGTH_PIECE/2 - WIDTH_PIECE/2),	// forward +z
-				new Vector3(LENGTH_PIECE/2 - WIDTH_PIECE/2, 0, WIDTH_PIECE/2 + LENGTH_PIECE/2),		// right +x
-				new Vector3(WIDTH_PIECE/2 + LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + WIDTH_PIECE/2),	// backward -z
-				new Vector3(-LENGTH_PIECE/2 + WIDTH_PIECE/2, 0, -WIDTH_PIECE/2 - LENGTH_PIECE/2)	// left -x
+				new Vector3(-WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2),	// forward +z
+				new Vector3(LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, 0, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),		// right +x
+				new Vector3(WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2),	// backward -z
+				new Vector3(-LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, 0, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2)	// left -x
 			},
 			
 			// XOY
 			new Vector3[]
 			{
-				new Vector3(LENGTH_PIECE/2 - WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2, 0),		// forward +x
-				new Vector3(WIDTH_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2, 0),	// right -y
-				new Vector3(-LENGTH_PIECE/2 + WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2, 0),	// backward -x
-				new Vector3(-WIDTH_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2, 0)		// left +y
+				new Vector3(LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0),		// forward +x
+				new Vector3(WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, 0),	// right -y
+				new Vector3(-LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0),	// backward -x
+				new Vector3(-WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, 0)		// left +y
 			},
 			
 			// YOZ
 			new Vector3[]
 			{
-				new Vector3(0, LENGTH_PIECE/2 - WIDTH_PIECE/2, -WIDTH_PIECE/2 - LENGTH_PIECE/2),	// forward +y
-				new Vector3(0, WIDTH_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - WIDTH_PIECE/2),		// right +z
-				new Vector3(0, -LENGTH_PIECE/2 + WIDTH_PIECE/2, WIDTH_PIECE/2 + LENGTH_PIECE/2),	// backward -y
-				new Vector3(0, -WIDTH_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + WIDTH_PIECE/2)	// left -z
+				new Vector3(0, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// forward +y
+				new Vector3(0, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - WIDTH_PIECE_DIV_2),		// right +z
+				new Vector3(0, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2, WIDTH_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),	// backward -y
+				new Vector3(0, -WIDTH_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + WIDTH_PIECE_DIV_2)	// left -z
 			}
 		};
 
@@ -189,28 +197,28 @@ namespace Assets.Scripts
 			// ZOX
 			new Vector3[]
 			{
-				new Vector3(0, HEIGHT_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// forward +z
-				new Vector3(LENGTH_PIECE/2 - HEIGHT_PIECE/2, HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0),	// right +x
-				new Vector3(0, HEIGHT_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2),	// backward -z
-				new Vector3(-LENGTH_PIECE/2 + HEIGHT_PIECE/2, HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0)	// left -x
+				new Vector3(0, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2),	// forward +z
+				new Vector3(LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0),	// right +x
+				new Vector3(0, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2),	// backward -z
+				new Vector3(-LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0)	// left -x
 			},
 			
 			// XOY
 			new Vector3[]
 			{
-				new Vector3(LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0, -HEIGHT_PIECE/2 - LENGTH_PIECE/2),	// forward +x
-				new Vector3(0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, -HEIGHT_PIECE/2 - LENGTH_PIECE/2),	// right -y
-				new Vector3(-LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0, -HEIGHT_PIECE/2 - LENGTH_PIECE/2),	// backward -x
-				new Vector3(0, LENGTH_PIECE/2 - HEIGHT_PIECE/2, - HEIGHT_PIECE/2 - LENGTH_PIECE/2)	// left +y
+				new Vector3(LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, 0, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// forward +x
+				new Vector3(0, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// right -y
+				new Vector3(-LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, 0, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2),	// backward -x
+				new Vector3(0, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, - HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2)	// left +y
 			},
 
 			// YOZ
 			new Vector3[]
 			{
-				new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0),	// forward +y
-				new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0, +LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// right +z
-				new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0),	// backward -y
-				new Vector3(HEIGHT_PIECE/2 + LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2)	// left -z
+				new Vector3(HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, 0),	// forward +y
+				new Vector3(HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0, +LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2),	// right +z
+				new Vector3(HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, 0),	// backward -y
+				new Vector3(HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2, 0, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2)	// left -z
 			}
 		};
 
@@ -219,28 +227,28 @@ namespace Assets.Scripts
 			// ZOX
 			new Vector3[]
 			{
-				new Vector3(0, -HEIGHT_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// forward +z
-				new Vector3(LENGTH_PIECE/2 - HEIGHT_PIECE/2, -HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0),	// right +x
-				new Vector3(0, -HEIGHT_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2),	// backward -z
-				new Vector3(-LENGTH_PIECE/2 + HEIGHT_PIECE/2, -HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0)	// left -x
+				new Vector3(0, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2),	// forward +z
+				new Vector3(LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0),	// right +x
+				new Vector3(0, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2),	// backward -z
+				new Vector3(-LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, -HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0)	// left -x
 			},
 
 			// XOY
 			new Vector3[]
 			{
-				new Vector3(LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0, HEIGHT_PIECE/2 + LENGTH_PIECE/2),	// forward +x
-				new Vector3(0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, HEIGHT_PIECE/2 + LENGTH_PIECE/2),	// right -y
-				new Vector3(-LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0, HEIGHT_PIECE/2 + LENGTH_PIECE/2),	// backward -x
-				new Vector3(0, LENGTH_PIECE/2 - HEIGHT_PIECE/2,  HEIGHT_PIECE/2 + LENGTH_PIECE/2)	// left +y
+				new Vector3(LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, 0, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),	// forward +x
+				new Vector3(0, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),	// right -y
+				new Vector3(-LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, 0, HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2),	// backward -x
+				new Vector3(0, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2,  HEIGHT_PIECE_DIV_2 + LENGTH_PIECE_DIV_2)	// left +y
 			},
 
 			// YOZ
 			new Vector3[]
 			{
-				new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, LENGTH_PIECE/2 - HEIGHT_PIECE/2, 0),	// forward +y
-				new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0, LENGTH_PIECE/2 - HEIGHT_PIECE/2),	// right +z
-				new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, -LENGTH_PIECE/2 + HEIGHT_PIECE/2, 0),	// backward -y
-				new Vector3(-HEIGHT_PIECE/2 - LENGTH_PIECE/2, 0, -LENGTH_PIECE/2 + HEIGHT_PIECE/2)	// left -z
+				new Vector3(-HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2, 0),	// forward +y
+				new Vector3(-HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0, LENGTH_PIECE_DIV_2 - HEIGHT_PIECE_DIV_2),	// right +z
+				new Vector3(-HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2, 0),	// backward -y
+				new Vector3(-HEIGHT_PIECE_DIV_2 - LENGTH_PIECE_DIV_2, 0, -LENGTH_PIECE_DIV_2 + HEIGHT_PIECE_DIV_2)	// left -z
 			}
 		};
 	}

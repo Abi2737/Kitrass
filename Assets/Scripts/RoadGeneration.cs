@@ -858,9 +858,9 @@ public class RoadGeneration : MonoBehaviour
 		piece.pickUpsX = px;
 		piece.pickUpsY = py;
 
-		float lengthOffset = RoadPositions.LENGTH_PIECE / 3.0f;
-		float heightOffset = RoadPositions.HEIGHT_PIECE / 3.0f;
-		float widthOffset = RoadPositions.WIDTH_PIECE / 3.0f;
+		float lengthOffset = RoadPositions.LENGTH_PIECE_DIV_3;
+		float heightOffset = RoadPositions.HEIGHT_PIECE_DIV_3;
+		float widthOffset = RoadPositions.WIDTH_PIECE_DIV_3;
 
 		float pfx, pfy, pfz;
 
@@ -886,7 +886,7 @@ public class RoadGeneration : MonoBehaviour
 						pfz += lengthOffset * sign;
 					}
 				}
-				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				else
 				{
 					pfx = piece.piece.transform.position.x - lengthOffset * sign;
 					pfy = piece.piece.transform.position.y + heightOffset * py;
@@ -915,7 +915,7 @@ public class RoadGeneration : MonoBehaviour
 						pfx += lengthOffset * sign;
 					}
 				}
-				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				else
 				{
 					pfx = piece.piece.transform.position.x + widthOffset * px;
 					pfy = piece.piece.transform.position.y - lengthOffset * sign;
@@ -944,7 +944,7 @@ public class RoadGeneration : MonoBehaviour
 						pfy += lengthOffset * sign;
 					}
 				}
-				else if (piece.dir == Direction.LEFT || piece.dir == Direction.RIGHT)
+				else
 				{
 					pfx = piece.piece.transform.position.x + lengthOffset * py;
 					pfy = piece.piece.transform.position.y + widthOffset * px;

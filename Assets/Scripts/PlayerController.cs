@@ -51,7 +51,9 @@ public class PlayerController : MonoBehaviour
 
 	bool _moveLeft, _moveRight;
 	bool _moveUp, _moveDown;
-	int _canMoveHorizontal;
+	bool _goToDesiredPos;
+
+	int _movePosX, _movePosY;
 
 	bool _turnLeft, _turnRight;
 	bool _turnUp, _turnDown;
@@ -67,8 +69,7 @@ public class PlayerController : MonoBehaviour
 	bool _pieceRoadChanged;
 	int _numPiecesChanged;
 
-	Vector3 _playerAngle, _playerDesiredPositionMask;
-	float _playerDesiredPosition;
+	Vector3 _playerAngle;
 
 	bool _dead;
 
@@ -77,7 +78,6 @@ public class PlayerController : MonoBehaviour
 	float _forwardSpeed;
 
 	bool _commandReceived;
-	Actions _lastActionReceived;
 	TcpServer _tcpServer;
 	bool _turnCommand;
 	float _reward;
@@ -111,7 +111,7 @@ public class PlayerController : MonoBehaviour
 		_turnLeft = _turnRight = _turnUp = _turnDown = false;
 		_moveLeft = _moveRight = _moveUp = _moveDown = false;
 
-		_canMoveHorizontal = 0;
+		_movePosX = _movePosY = 0;
 
 		_playerAngle = Vector3.zero;
 
@@ -119,9 +119,6 @@ public class PlayerController : MonoBehaviour
 
 		_thePieceRoadWhereIam = _roadGeneration.GetPlayerStartPiece();
 		_thePieceRoadWhereIam.playerWasHere = true;
-
-		_playerDesiredPositionMask = Vector3.zero;
-		_playerDesiredPosition = 0.0f;
 
 		_numPiecesChanged = 0;
 
@@ -142,7 +139,6 @@ public class PlayerController : MonoBehaviour
 		_forwardSpeed = moveSettings.forwardMinVel;
 
 		_commandReceived = false;
-		_lastActionReceived = Actions.NONE;
 
 		_tcpServer = null;
 		GameObject tcpGameObject = GameObject.Find("PersistentTCPServerGameObject");
@@ -191,8 +187,6 @@ public class PlayerController : MonoBehaviour
 		{
 			_pieceRoadChanged = true;
 
-			_canTurn = true;
-
 			// disable the parent that the player doesn't see that the piece was disable
 			_thePieceRoadWhereIam.parent.parent.Disable();
 			_thePieceRoadWhereIam.parent.DisablePickups();
@@ -221,6 +215,10 @@ public class PlayerController : MonoBehaviour
 				_numPiecesChanged = 0;
 			}
 
+			if (!_canTurn)
+				_goToDesiredPos = true;
+
+			_canTurn = true;
 			_actionTaken = Actions.NONE;
 			
 			//Debug.Log("TG: " + _thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
@@ -266,7 +264,6 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-
 	private void OnCollisionStay(Collision collision)
 	{
 		_isInCollision = true;
@@ -291,7 +288,6 @@ public class PlayerController : MonoBehaviour
 			cmdRecvText.color = Color.red;
 
 		_commandReceived = true;
-		_lastActionReceived = action;
 
 		_verticalInput = 0;
 		if (action == Actions.MOVE_UP)
@@ -332,36 +328,25 @@ public class PlayerController : MonoBehaviour
 		if (_commandReceived)
 			return;
 
-		if (_lastActionReceived == Actions.MOVE_DOWN || _lastActionReceived == Actions.MOVE_UP || 
-			_lastActionReceived == Actions.MOVE_LEFT || _lastActionReceived == Actions.MOVE_RIGHT)
-		{
-			_verticalInput = 0;
-			if (_lastActionReceived == Actions.MOVE_UP)
-				_verticalInput = 1;
-			else if (_lastActionReceived == Actions.MOVE_DOWN)
-				_verticalInput = -1;
-
-			_horizontalInput = 0;
-			if (_lastActionReceived == Actions.MOVE_RIGHT)
-				_horizontalInput = 1;
-			else if (_lastActionReceived == Actions.MOVE_LEFT)
-				_horizontalInput = -1;
-		}
-
 		if (_tcpServer == null || !_tcpServer.ClientConnected())
 		{
-			_verticalInput = 0;
-			if (Input.GetKey(KeyCode.W))
-				_verticalInput = 1;
-			else if (Input.GetKey(KeyCode.S))
-				_verticalInput = -1;
+			//_verticalInput = 0;
+			//if (Input.GetKey(KeyCode.W))
+			//	_verticalInput = 1;
+			//else if (Input.GetKey(KeyCode.S))
+			//	_verticalInput = -1;
 
 
-			_horizontalInput = 0;
-			if (Input.GetKey(KeyCode.D))
-				_horizontalInput = 1;
-			else if (Input.GetKey(KeyCode.A))
-				_horizontalInput = -1;
+			//_horizontalInput = 0;
+			//if (Input.GetKey(KeyCode.D))
+			//	_horizontalInput = 1;
+			//else if (Input.GetKey(KeyCode.A))
+			//	_horizontalInput = -1;
+
+			_moveLeft = Input.GetKeyDown(KeyCode.A);
+			_moveRight = Input.GetKeyDown(KeyCode.D);
+			_moveUp = Input.GetKeyDown(KeyCode.W);
+			_moveDown = Input.GetKeyDown(KeyCode.S);
 		}
 		
 
@@ -393,8 +378,6 @@ public class PlayerController : MonoBehaviour
 		if (_forwardSpeed < moveSettings.forwardMaxVel )
 			_forwardSpeed += moveSettings.increaseForwardVelPerSecond * Time.deltaTime;
 
-		//Debug.Log(_forwardSpeed);
-
 		_scoreManager.AddToScore(pointsPerSecond * Time.deltaTime);
 
 		//if ((_turnLeft || _turnRight || _turnUp || _turnDown))
@@ -404,6 +387,8 @@ public class PlayerController : MonoBehaviour
 		//	_lights.transform.position = transform.position;
 		//	_lights.transform.rotation = transform.rotation;
 		//}
+
+		Debug.Log(_movePosX + " " + _movePosY);
 
 		if (_startTimer)
 			_timeCount += Time.deltaTime;
@@ -416,27 +401,159 @@ public class PlayerController : MonoBehaviour
 			_reward = _isInCollision ? MOVE_COLLISION_REWARD : MOVE_REWARD;
 			SendRewardToServer();
 		}
+	}
 
+	private float ClosestPoint(float p1, float p2, float p3, float t, out int ind)
+	{
+		float d1 = Math.Abs(t - p1);
+		float d2 = Math.Abs(t - p2);
+		float d3 = Math.Abs(t - p3);
 
-		//Debug.Log(_dir + " " + _plane + " " + _upsideDown);
-		//Debug.Log(_thePieceRoadWhereIam.piece.transform.position + " type: " + _thePieceRoadWhereIam.type);
+		if (d1 < d2)
+		{
+			if (d1 < d3)
+			{
+				ind = 0;
+				return p1;
+			}
 
-		//if (_thePieceRoadWhereIam.plane == Assets.Scripts.Plane.YOZ)
-		//Debug.Log(_upsideDown + " " + _dir + " " + _plane);
-		//else
-		//	Debug.Log(_thePieceRoadWhereIam.plane);
+			ind = 2;
+			return p3;
+		}
 
-		//Debug.Log( _upsideDown + " " + _thePieceRoadWhereIam.upsideDown + " " + _plane + " " + _thePieceRoadWhereIam.plane);
+		if (d2 < d3)
+		{
+			ind = 1;
+			return p2;
+		}
 
-		//Debug.Log(transform.position.x + " " + _thePieceRoadWhereIam.piece.transform.position.x);
+		ind = 2;
+		return p3;
+	}
+
+	private void GoToDesiredPosition()
+	{
+		Vector3 desiredPos = transform.position;
+
+		int ind;
+
+		switch (_thePieceRoadWhereIam.plane)
+		{
+			case Assets.Scripts.Plane.ZOX:
+				if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+				{
+					desiredPos.x = _thePieceRoadWhereIam.piece.transform.position.x;
+					desiredPos.y = _thePieceRoadWhereIam.piece.transform.position.y;
+
+					desiredPos.x = ClosestPoint(desiredPos.x - RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.x, desiredPos.x + RoadPositions.WIDTH_PIECE_DIV_3, transform.position.x, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.BACKWARD)
+						_movePosX = -_movePosX;
+
+					desiredPos.y = ClosestPoint(desiredPos.y - RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.y, desiredPos.y + RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.y, out ind);
+					_movePosY = ind - 1;
+				}
+				else
+				{
+					desiredPos.y = _thePieceRoadWhereIam.piece.transform.position.y;
+					desiredPos.z = _thePieceRoadWhereIam.piece.transform.position.z;
+
+					desiredPos.z = ClosestPoint(desiredPos.z + RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.z, desiredPos.z - RoadPositions.WIDTH_PIECE_DIV_3, transform.position.z, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.LEFT)
+						_movePosX = -_movePosX;
+
+					desiredPos.y = ClosestPoint(desiredPos.y - RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.y, desiredPos.y + RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.y, out ind);
+					_movePosY = ind - 1;
+				}
+				break;
+
+			case Assets.Scripts.Plane.XOY:
+				if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+				{
+					desiredPos.y = _thePieceRoadWhereIam.piece.transform.position.y;
+					desiredPos.z = _thePieceRoadWhereIam.piece.transform.position.z;
+
+					desiredPos.y = ClosestPoint(desiredPos.y + RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.y, desiredPos.y - RoadPositions.WIDTH_PIECE_DIV_3, transform.position.y, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.BACKWARD)
+						_movePosX = -_movePosX;
+
+					desiredPos.z = ClosestPoint(desiredPos.z + RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.z, desiredPos.z - RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.z, out ind);
+					_movePosY = ind - 1;
+				}
+				else
+				{
+					desiredPos.x = _thePieceRoadWhereIam.piece.transform.position.x;
+					desiredPos.z = _thePieceRoadWhereIam.piece.transform.position.z;
+
+					desiredPos.x = ClosestPoint(desiredPos.x + RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.x, desiredPos.x - RoadPositions.WIDTH_PIECE_DIV_3, transform.position.x, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.LEFT)
+						_movePosX = -_movePosX;
+
+					desiredPos.z = ClosestPoint(desiredPos.z + RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.z, desiredPos.z - RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.z, out ind);
+					_movePosY = ind - 1;
+				}
+				break;
+
+			case Assets.Scripts.Plane.YOZ:
+				if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+				{
+					desiredPos.x = _thePieceRoadWhereIam.piece.transform.position.x;
+					desiredPos.z = _thePieceRoadWhereIam.piece.transform.position.z;
+
+					desiredPos.z = ClosestPoint(desiredPos.z - RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.z, desiredPos.z + RoadPositions.WIDTH_PIECE_DIV_3, transform.position.z, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.BACKWARD)
+						_movePosX = -_movePosX;
+
+					desiredPos.x = ClosestPoint(desiredPos.x - RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.x, desiredPos.x + RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.x, out ind);
+					_movePosY = ind - 1;
+				}
+				else
+				{
+					desiredPos.x = _thePieceRoadWhereIam.piece.transform.position.x;
+					desiredPos.y = _thePieceRoadWhereIam.piece.transform.position.y;
+
+					desiredPos.y = ClosestPoint(desiredPos.y + RoadPositions.WIDTH_PIECE_DIV_3, desiredPos.y, desiredPos.y - RoadPositions.WIDTH_PIECE_DIV_3, transform.position.y, out ind);
+					_movePosX = ind - 1;
+					if (_thePieceRoadWhereIam.dir == Direction.LEFT)
+						_movePosX = -_movePosX;
+
+					desiredPos.x = ClosestPoint(desiredPos.x - RoadPositions.HEIGHT_PIECE_DIV_3, desiredPos.x, desiredPos.x + RoadPositions.HEIGHT_PIECE_DIV_3, transform.position.x, out ind);
+					_movePosY = ind - 1;
+				}
+				break;
+		}
+
+		if (_thePieceRoadWhereIam.upsideDown)
+		{
+			_movePosX = -_movePosX;
+			_movePosY = -_movePosY;
+		}
+
+		transform.position = Vector3.Slerp(transform.position, desiredPos, 2 * Time.deltaTime);
+		//transform.position = desiredPos;
+
+		if (transform.position == desiredPos)
+		{
+			_goToDesiredPos = false;
+		}
 	}
 
 	private void FixedUpdate()
 	{
+		if (_goToDesiredPos)
+		{
+			GoToDesiredPosition();
+		}
+
 		MoveForward();
-		//Move();
+		Move();
 
 		_rBody.velocity = transform.TransformDirection(_velocity);
+
 	}
 
 	private void MoveForward()
@@ -444,9 +561,9 @@ public class PlayerController : MonoBehaviour
 		// move
 		_velocity.z = _forwardSpeed * Time.deltaTime;
 
-		_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
+		//_velocity.y = moveSettings.verticalVel * _verticalInput * Time.deltaTime;
 
-		_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
+		//_velocity.x = moveSettings.horizontalVel * _horizontalInput * Time.deltaTime;
 	}
 
 	private void LateUpdate()
@@ -456,422 +573,106 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
+		if ((_moveDown || _moveUp || _moveLeft || _moveRight) == false)
+			return;
+
+		int sign = 1;
+		if (_upsideDown)
+			sign = -1;
+
 		if (_moveLeft)
+			_movePosX -= 1 * sign;
+
+		if (_moveRight)
+			_movePosX += 1 * sign;
+
+		if (_moveDown)
+			_movePosY -= 1 * sign;
+
+		if (_moveUp)
+			_movePosY += 1 * sign;
+
+		_movePosX = Math.Max(_movePosX, -1);
+		_movePosX = Math.Min(_movePosX, +1);
+
+		_movePosY = Math.Max(_movePosY, -1);
+		_movePosY = Math.Min(_movePosY, +1);
+
+		float lengthOffset = RoadPositions.LENGTH_PIECE_DIV_3;
+		float heightOffset = RoadPositions.HEIGHT_PIECE_DIV_3;
+		float widthOffset = RoadPositions.WIDTH_PIECE_DIV_3;
+
+		float pfx, pfy, pfz;
+
+		Vector3 desiredPos = transform.position;
+
+		switch (_thePieceRoadWhereIam.plane)
 		{
-			MoveLeft();
-		}
-		else if (_moveRight)
-		{
-			MoveRight();
-		}
-		else if (_moveUp)
-		{
-			MoveUp();
-		}
-		else if (_moveDown)
-		{
-			MoveDown();
-		}
+		case Assets.Scripts.Plane.ZOX:
+			if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+			{
+				pfx = _thePieceRoadWhereIam.piece.transform.position.x + widthOffset * _movePosX;
+				pfy = _thePieceRoadWhereIam.piece.transform.position.y + heightOffset * _movePosY;
+				//pfz = _thePieceRoadWhereIam.piece.transform.position.z - lengthOffset * sign;
 
-		Vector3 pos = transform.position;
-		if (_playerDesiredPositionMask.x != 0)
-		{
-			pos.x = _playerDesiredPosition;
-			if (Math.Abs(transform.position.x - pos.x) <= 0.01f)
-				transform.position = pos;
-		}
-		else if (_playerDesiredPositionMask.y != 0)
-		{
-			pos.y = _playerDesiredPosition;
-			if (Math.Abs(transform.position.y - pos.y) <= 0.01f)
-				transform.position = pos;
-		}
-		else if (_playerDesiredPositionMask.z != 0)
-		{
-			pos.z = _playerDesiredPosition;
-			if (Math.Abs(transform.position.z - pos.z) <= 0.01f)
-				transform.position = pos;
-		}
+				desiredPos.x = pfx;
+				desiredPos.y = pfy;
+			}
+			else
+			{
+				//pfx = _thePieceRoadWhereIam.piece.transform.position.x - lengthOffset * sign;
+				pfy = _thePieceRoadWhereIam.piece.transform.position.y + heightOffset * _movePosY;
+				pfz = _thePieceRoadWhereIam.piece.transform.position.z + widthOffset * _movePosX;
 
+				desiredPos.y = pfy;
+				desiredPos.z = pfz;
+			}
+			break;
 
-		if (transform.position != pos && _canTurn)
-			transform.position = Vector3.Lerp(transform.position, pos, 5 * Time.deltaTime);
-		else
-			_playerDesiredPositionMask = Vector3.zero;
-	}
+		case Assets.Scripts.Plane.XOY:
+			if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+			{
+				//pfx = _thePieceRoadWhereIam.piece.transform.position.x - lengthOffset * sign;
+				pfy = _thePieceRoadWhereIam.piece.transform.position.y + widthOffset * _movePosX;
+				pfz = _thePieceRoadWhereIam.piece.transform.position.z + heightOffset * _movePosY;
 
-	private void MoveLeft()
-	{
-		int sign = 1;
-		if (_upsideDown)
-			sign = -1;
+				desiredPos.y = pfy;
+				desiredPos.z = pfz;
+			}
+			else
+			{
+				pfx = _thePieceRoadWhereIam.piece.transform.position.x + widthOffset * _movePosX;
+				//pfy = _thePieceRoadWhereIam.piece.transform.position.y - lengthOffset * sign;
+				pfz = _thePieceRoadWhereIam.piece.transform.position.z + heightOffset * _movePosY;
 
-		Vector3 pos = transform.position;
-		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
+				desiredPos.x = pfx;
+				desiredPos.z = pfz;
+			}
+			break;
 
-		_playerDesiredPositionMask = Vector3.zero;
+		case Assets.Scripts.Plane.YOZ:
+			if (_thePieceRoadWhereIam.dir == Direction.FORWARD || _thePieceRoadWhereIam.dir == Direction.BACKWARD)
+			{
+				pfx = _thePieceRoadWhereIam.piece.transform.position.x + heightOffset * _movePosY;
+				//pfy = _thePieceRoadWhereIam.piece.transform.position.y - lengthOffset * sign;
+				pfz = _thePieceRoadWhereIam.piece.transform.position.z + widthOffset * _movePosX;
 
-		switch (_dir)
-		{
-			case Direction.FORWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.x, 2) > Math.Round(piecePos.x, 2))
-							pos.x = piecePos.x;
-						else
-							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
+				desiredPos.x = pfx;
+				desiredPos.z = pfz;
+			}
+			else
+			{
+				pfx = _thePieceRoadWhereIam.piece.transform.position.x + lengthOffset * _movePosY;
+				pfy = _thePieceRoadWhereIam.piece.transform.position.y + widthOffset * _movePosX;
+				//pfz = _thePieceRoadWhereIam.piece.transform.position.z - lengthOffset * sign;
 
-						_playerDesiredPositionMask = new Vector3(1, 0, 0);
-						_playerDesiredPosition = pos.x;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.RIGHT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.z, 2) < Math.Round(piecePos.z, 2))
-							pos.z = piecePos.z;
-						else
-							pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(0, 0, 1);
-						_playerDesiredPosition = pos.z;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.BACKWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.x, 2) < Math.Round(piecePos.x, 2))
-							pos.x = piecePos.x;
-						else
-							pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(1, 0, 0);
-						_playerDesiredPosition = pos.x;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.LEFT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.z, 2) > Math.Round(piecePos.z, 2))
-							pos.z = piecePos.z;
-						else
-							pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(0, 0, 1);
-						_playerDesiredPosition = pos.z;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
+				desiredPos.x = pfx;
+				desiredPos.y = pfy;
+			}
+			break;
 		}
 
-		//_playerDesiredPosition = pos;
-		//transform.position = pos;
-	}
-
-	private void MoveRight()
-	{
-		int sign = 1;
-		if (_upsideDown)
-			sign = -1;
-
-		Vector3 pos = transform.position;
-		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
-
-		_playerDesiredPositionMask = Vector3.zero;
-
-		switch (_dir)
-		{
-			case Direction.FORWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.x, 2) < Math.Round(piecePos.x, 2))
-							pos.x = piecePos.x;
-						else
-							pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(1, 0, 0);
-						_playerDesiredPosition = pos.x;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.RIGHT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.z, 2) > Math.Round(piecePos.z, 2))
-							pos.z = piecePos.z;
-						else
-							pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(0, 0, 1);
-						_playerDesiredPosition = pos.z;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.BACKWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.x, 2) > Math.Round(piecePos.x, 2))
-							pos.x = piecePos.x;
-						else
-							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(1, 0, 0);
-						_playerDesiredPosition = pos.x;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.LEFT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Round(pos.z, 2) < Math.Round(piecePos.z, 2))
-							pos.z = piecePos.z;
-						else
-							pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-
-						_playerDesiredPositionMask = new Vector3(0, 0, 1);
-						_playerDesiredPosition = pos.z;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-		}
-
-		//_playerDesiredPosition = pos;
-		//transform.position = pos;
-	}
-
-	private void MoveLeftOrRight(bool left)
-	{
-		int sign = 1;
-		if (_upsideDown)
-			sign = -1;
-
-		if (!left)
-			sign = -sign;
-
-		Vector3 pos = transform.position;
-		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
-		float offset = 1;
-
-		switch (_dir)
-		{
-			case Direction.FORWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						if (Math.Abs(pos.x - piecePos.x) < offset)
-							pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
-						else
-							pos.x = piecePos.x;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.RIGHT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.BACKWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.x = piecePos.x + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.z = piecePos.z + RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.LEFT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.z = piecePos.z - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.x = piecePos.x - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.y = piecePos.y - RoadPositions.WIDTH_PIECE / 3 * sign;
-						break;
-				}
-				break;
-		}
-
-		transform.position = pos;
-	}
-
-	private void MoveUp()
-	{
-		MoveDownOrUp(false);
-	}
-
-	private void MoveDown()
-	{
-		MoveDownOrUp(true);
-	}
-
-	private void MoveDownOrUp(bool down)
-	{
-		int sign = 1;
-		if (_upsideDown)
-			sign = -1;
-
-		if (!down)
-			sign = -sign;
-
-		Vector3 pos = transform.position;
-		Vector3 piecePos = _thePieceRoadWhereIam.piece.transform.position;
-
-		switch (_dir)
-		{
-			case Direction.FORWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.y = piecePos.y - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.z = piecePos.z + RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.x = piecePos.x - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.RIGHT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.y = piecePos.y - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.z = piecePos.z + RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.x = piecePos.x - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-				}
-				break;
-
-			case Direction.BACKWARD:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.y = piecePos.y - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.z = piecePos.z + RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.x = piecePos.x - RoadPositions.HEIGHT_PIECE / 3 * sign;//
-						break;
-				}
-				break;
-
-			case Direction.LEFT:
-				switch (_plane)
-				{
-					case Assets.Scripts.Plane.ZOX:
-						pos.y = piecePos.y - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.XOY:
-						pos.z = piecePos.z + RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-					case Assets.Scripts.Plane.YOZ:
-						pos.x = piecePos.x - RoadPositions.HEIGHT_PIECE / 3 * sign;
-						break;
-				}
-				break;
-		}
-
-		transform.position = pos;
+		transform.position = desiredPos;
 	}
 	
 	private void Turn()
